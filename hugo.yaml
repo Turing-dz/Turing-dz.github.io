@@ -137,7 +137,7 @@ params:
     title: "Zoe."
     subtitle: "I'm an engineer."
     content: "I aspire to a healthy, free, and happy life."
-    image: /images/hero.svg
+    image: /images/self.jpeg
     bottomImage:
       enable: true
     # roundImage: true # Make hero image circular | default false
@@ -155,7 +155,7 @@ params:
           url: /wechat
       customIcons:
         - icon: /fav.png
-          url: "https://example.com"
+          url: "https://turing-dz.github.io/"
 
   # About
   about:
@@ -362,12 +362,13 @@ params:
       title: Recent Posts
       enable: true
       disableFeaturedImage: false
-    # socialNetworks:
-    #   github: https://github.com
-    #   linkedin: https://linkedin.com
-    #   twitter: https://twitter.com
-    #   instagram: https://instagram.com
-    #   facebook: https://facebook.com
+    socialNetworks:
+      # github: https://github.com
+      # linkedin: https://linkedin.com
+      # twitter: https://twitter.com
+      # instagram: https://instagram.com
+      # facebook: https://facebook.com
+      wechat: /wechat
 
   # List pages like blogs and posts
   listPages:
@@ -397,5 +398,5 @@ params:
     articleList: "Jan 2, 2006"
     articleRecent: "Jan 2, 2006"
 
-  #customScripts: -| # You can add custom scripts which will be added before </body> tag
+  # customScripts: -| # You can add custom scripts which will be added before </body> tag
   #  <script type="text/javascript"><!-- any script here --></script>
