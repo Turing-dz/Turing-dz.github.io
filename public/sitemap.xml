@@ -3,21 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/blogs/</loc>
-    <lastmod>2025-12-17T12:31:27+08:00</lastmod>
+    <lastmod>2026-02-21T12:31:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/life/</loc>
+    <lastmod>2026-02-21T12:31:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/</loc>
+    <lastmod>2026-02-21T12:31:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2026-02-21T12:31:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/</loc>
+    <lastmod>2026-02-21T12:31:27+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/blogs/hoge_github/</loc>
     <lastmod>2025-12-17T12:31:27+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/life/</loc>
-    <lastmod>2025-12-17T12:31:27+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/link/</loc>
-    <lastmod>2025-12-17T12:31:27+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2025-12-17T12:31:27+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2025-12-17T12:31:27+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/wechat/</loc>
@@ -25,6 +28,20 @@
   </url><url>
     <loc>http://localhost:1313/gallery/</loc>
     <lastmod>2022-06-25T18:35:46+05:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/blogs/1.prompt/</loc>
+  </url><url>
+    <loc>http://localhost:1313/blogs/10.tools/</loc>
+  </url><url>
+    <loc>http://localhost:1313/blogs/2.model/</loc>
+  </url><url>
+    <loc>http://localhost:1313/blogs/3.outputparser/</loc>
+  </url><url>
+    <loc>http://localhost:1313/blogs/4.runnable/</loc>
+  </url><url>
+    <loc>http://localhost:1313/blogs/5.chainsmith/</loc>
+  </url><url>
+    <loc>http://localhost:1313/blogs/6.historymemory/</loc>
   </url><url>
     <loc>http://localhost:1313/categories/</loc>
   </url>

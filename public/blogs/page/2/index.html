@@ -309,24 +309,22 @@ Blogs | Profile
             <div class="card-columns">
                 <div class="card h-100">
                     
-                    <div class="card-header">
-                        <a href="/blogs/placeholder-text/">
-                            <img src="/images/post.jpg" class="card-img-top" alt="Placeholder Text">
-                        </a>
-                    </div>
-                    
                     <div class="card-body bg-transparent p-4 shadow-sm">
-                        <a href="/blogs/placeholder-text/" class="primary-font card-title">
-                            <h5 class="card-title bg-transparent" title="Placeholder Text">Placeholder Text</h5>
+                        <a href="/blogs/10.tools/" class="primary-font card-title">
+                            <h5 class="card-title bg-transparent" title=""></h5>
                         </a>
                         <div class="card-text secondary-font">
-                            <p><p>Lorem est tota propiore conpellat pectoribus de pectora summo.</p>
-<p>Redit teque digerit hominumque toris verebor lumina non cervice subde tollit usus habet Arctonque, furores quas nec ferunt. Quoque montibus nunc caluere tempus inhospita parcite confusaque translucet patri vestro qui optatis lumine …</p></p>
+                            <p><p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具 …</p></p>
                         </div>
                     </div>
                     <div class="mt-auto post-footer bg-transparent py-3">
-                        <span class="float-start bg-transparent">Apr 3, 2021</span>
-                        <a href="/blogs/placeholder-text/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                        <span class="float-start bg-transparent">Jan 1, 0001</span>
+                        <a href="/blogs/10.tools/" class="float-end btn btn-outline-info btn-sm">Read</a>
                     </div>
                 </div>
             </div>
@@ -336,27 +334,55 @@ Blogs | Profile
             <div class="card-columns">
                 <div class="card h-100">
                     
-                    <div class="card-header">
-                        <a href="/blogs/rich-content/">
-                            <img src="/images/post.jpg" class="card-img-top" alt="Rich Content">
-                        </a>
-                    </div>
-                    
                     <div class="card-body bg-transparent p-4 shadow-sm">
-                        <a href="/blogs/rich-content/" class="primary-font card-title">
-                            <h5 class="card-title bg-transparent" title="Rich Content">Rich Content</h5>
+                        <a href="/blogs/2.model/" class="primary-font card-title">
+                            <h5 class="card-title bg-transparent" title=""></h5>
                         </a>
                         <div class="card-text secondary-font">
-                            <p><p>Hugo ships with several <a href="https://gohugo.io/content-management/shortcodes/#embedded">Embedded Shortcodes</a> for rich content, along with a <a href="https://gohugo.io/about/privacy/#configuration">Privacy Config</a> and a set of Simple Shortcodes that enable static and no-JS versions of various social media embeds.</p>
-<h2 id="x-simple-shortcode">X Simple Shortcode</h2>
-<pre tabindex="0"><code>{{&lt; tweet user=&#34;GoHugoIO&#34; id=&#34;1315233626070503424&#34; &gt;}}
-</code></pre><br>
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Profile is a …</p></blockquote></p>
+                            <p><p>参考：https://docs.langchain.com/oss/python/langchain/models</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/02model.png" alt="02model"></p>
+<h1 id="1chatxxx模型实例化langchain_xxx">1.ChatXXX模型实例化(langchain_xxx)</h1>
+<p>LangChain本身不提供自己的LLM，而是提供标准接口。</p>
+<p>LLM使用纯文本作为输入输出的大语言模型。</p>
+<p>ChatModel使用聊天消息列表作为输入并返回聊天消息的聊天模型。</p>
+<p>两种模型接口都接受字符串，PromptValue以及消息列表作为参数，内部会根据模型的类型自动转换成字符串或者消息列表，屏蔽了不同模型的差异。</p>
+<h2 id="11chatopenai">1.1.ChatOpenAI</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>chat_model <span style="color:#f92672">= …</span></span></span></span></span></code></pre></div></p>
                         </div>
                     </div>
                     <div class="mt-auto post-footer bg-transparent py-3">
-                        <span class="float-start bg-transparent">Apr 3, 2021</span>
-                        <a href="/blogs/rich-content/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                        <span class="float-start bg-transparent">Jan 1, 0001</span>
+                        <a href="/blogs/2.model/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 my-3">
+            <div class="card-columns">
+                <div class="card h-100">
+                    
+                    <div class="card-body bg-transparent p-4 shadow-sm">
+                        <a href="/blogs/3.outputparser/" class="primary-font card-title">
+                            <h5 class="card-title bg-transparent" title=""></h5>
+                        </a>
+                        <div class="card-text secondary-font">
+                            <p><p>参考：https://docs.langchain.com/oss/python/langchain/structured-output</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/03outputparser.png" alt="03outputparser"></p>
+<p>OutputParser的使用其实也就三步：</p>
+<p>1.定义parser；2.parser.get_format_instructions()插入到prompt；3.输出parser.invoke()</p>
+<h1 id="1datetimeoutputparser">1.DatetimeOutputParser</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.创建Parser</span>
+</span></span><span style="display:flex;"><span>output_parser <span style="color:#f92672">=</span> DatetimeOutputParser()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.创建提示模板</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([ …</span></span></span></span></span></span></span></span></span></span></code></pre></div></p>
+                        </div>
+                    </div>
+                    <div class="mt-auto post-footer bg-transparent py-3">
+                        <span class="float-start bg-transparent">Jan 1, 0001</span>
+                        <a href="/blogs/3.outputparser/" class="float-end btn btn-outline-info btn-sm">Read</a>
                     </div>
                 </div>
             </div>
@@ -378,11 +404,14 @@ Blogs | Profile
       <li class="page-item active">
         <a aria-current="page" aria-label="Page 2" class="page-link" role="button">2</a>
       </li>
-      <li class="page-item disabled">
-        <a aria-disabled="true" aria-label="Next" class="page-link" role="button" tabindex="-1"><span aria-hidden="true">&raquo;</span></a>
+      <li class="page-item">
+        <a href="/blogs/page/3/" aria-label="Page 3" class="page-link" role="button">3</a>
       </li>
-      <li class="page-item disabled">
-        <a aria-disabled="true" aria-label="Last" class="page-link" role="button" tabindex="-1"><span aria-hidden="true">&raquo;&raquo;</span></a>
+      <li class="page-item">
+        <a href="/blogs/page/3/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blogs/page/3/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
             </div>
@@ -406,26 +435,31 @@ Blogs | Profile
             <div class="card h-100">
                 
                 <div class="card-header">
-                    <a href="/blogs/math/">
-                        <img src="/images/mathjax.png" class="card-img-top" alt="Render Math With Mathjax">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+                        <img src="/images/blogs/claudecode.jpeg" class="card-img-top" alt="不翻墙使用Claude-code">
                     </a>
                 </div>
                 
                 <div class="card-body bg-transparent p-3 shadow-sm">
-                    <a href="/blogs/math/" class="primary-font card-title">
-                        <h5 class="card-title bg-transparent" title="Render Math With Mathjax">Render Math With Mathjax</h5>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="不翻墙使用Claude-code">不翻墙使用Claude-code</h5>
                     </a>
                     <div class="card-text secondary-font">
-                        <p><h2 id="mathjax">Mathjax</h2>
-<p>Math equations can be rendered using <a href="https://www.mathjax.org">Mathjax</a> syntax with AMS symbol support.</p>
-<p>Optionally enable this on a per-page basis by adding <code>mathjax: true</code> to your frontmatter.</p>
-<p>Then, use <code>$$ ... $$</code> on a line by itself to render a block equation:</p>
-<p>$$ | Pr_{x \leftarrow P_{1}} [A(x) = 1] - Pr_{x \leftarrow …</p></p>
+                        <p><p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
+<h1 id="1安装claude_code">1.安装claude_code</h1>
+<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
+</span></span><span style="display:flex;"><span>claude -v
+</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
+<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
+</span></span><span style="display:flex;"><span>vi …</span></span></span></span></code></pre></div></p>
                     </div>
                 </div>
                 <div class="mt-auto card-footer">
-                    <span class="float-start">Dec 9, 2022</span>
-                    <a href="/blogs/math/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                    <span class="float-start">Feb 21, 2026</span>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="float-end btn btn-outline-info btn-sm">Read</a>
                 </div>
             </div>
         </div>
@@ -434,23 +468,27 @@ Blogs | Profile
             <div class="card h-100">
                 
                 <div class="card-header">
-                    <a href="/blogs/markdown-syntax/">
-                        <img src="/images/post.jpg" class="card-img-top" alt="Markdown Syntax">
+                    <a href="/blogs/hoge_github/">
+                        <img src="/images/blogs/blog.jpeg" class="card-img-top" alt="Hugo和GitHub搭建博客">
                     </a>
                 </div>
                 
                 <div class="card-body bg-transparent p-3 shadow-sm">
-                    <a href="/blogs/markdown-syntax/" class="primary-font card-title">
-                        <h5 class="card-title bg-transparent" title="Markdown Syntax">Markdown Syntax</h5>
+                    <a href="/blogs/hoge_github/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="Hugo和GitHub搭建博客">Hugo和GitHub搭建博客</h5>
                     </a>
                     <div class="card-text secondary-font">
-                        <p><h2 id="paragraph">Paragraph</h2>
-<p>Xerum, quo qui aut unt expliquam qui dolut labo. Aque venitatiusda cum, voluptionse latur sitiae dolessi aut parist aut dollo enim qui voluptate ma dolestendit peritin re plis aut quas inctum laceat est volestemque commosa as cus endigna tectur, offic to cor sequas etum rerum idem sintibus …</p></p>
+                        <p><p>本文主要是使用hugo和github进行个人博客网站的搭建，21年刚上班的时候搭过一版，没怎么用，希望这次能坚持在这里记录自己的博客。</p>
+<h1 id="1本地hugo安装">1.本地hugo安装</h1>
+<p>因为有版本兼容问题，所以先去选择主题，然后看看主题对应推荐的hugo版本，然后下载对应版本的hugo。
+<a href="https://themes.gohugo.io/">hugo主题社区</a>里面选择，我选择了<a href="https://hugo-profile.netlify.app/">hugo-profile</a>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>brew install hugo@0.145.0           <span style="color:#75715e">#下载安装，如果失败，就下载这个版本的tar.gz文件，解压，然后sudo mv hugo /usr/local/bin/hugo把解压后的hugo放置到path目录下</span>
+</span></span><span style="display:flex;"><span>sudo xattr -rd …</span></span></span></span></code></pre></div></p>
                     </div>
                 </div>
                 <div class="mt-auto card-footer">
-                    <span class="float-start">Apr 3, 2021</span>
-                    <a href="/blogs/markdown-syntax/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/hoge_github/" class="float-end btn btn-outline-info btn-sm">Read</a>
                 </div>
             </div>
         </div>
@@ -458,26 +496,24 @@ Blogs | Profile
         <div class="col-lg-4 col-md-6 pt-2">
             <div class="card h-100">
                 
-                <div class="card-header">
-                    <a href="/blogs/emoji-support/">
-                        <img src="/images/post.jpg" class="card-img-top" alt="Emoji Support">
-                    </a>
-                </div>
-                
                 <div class="card-body bg-transparent p-3 shadow-sm">
-                    <a href="/blogs/emoji-support/" class="primary-font card-title">
-                        <h5 class="card-title bg-transparent" title="Emoji Support">Emoji Support</h5>
+                    <a href="/blogs/1.prompt/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title=""></h5>
                     </a>
                     <div class="card-text secondary-font">
-                        <p><p>Emoji can be enabled in a Hugo project in a number of ways. :zap:</p>
-<h2 id="emoji-support">Emoji Support</h2>
-<p>The <a href="https://gohugo.io/functions/emojify/">emojify</a> function can be called directly in templates or <a href="https://gohugo.io/templates/shortcode-templates/#inline-shortcodes">Inline Shortcodes</a>.</p>
-<p>To enable emoji globally, set <code>enableEmoji</code> to <code>true</code> in your site’s <a href="https://gohugo.io/getting-started/configuration/">configuration</a> and then you can type emoji shorthand codes directly in …</p></p>
+                        <p><p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">. …</span></span></span></span></span></code></pre></div></p>
                     </div>
                 </div>
                 <div class="mt-auto card-footer">
-                    <span class="float-start">Apr 3, 2021</span>
-                    <a href="/blogs/emoji-support/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                    <span class="float-start">Jan 1, 0001</span>
+                    <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
                 </div>
             </div>
         </div>
@@ -506,7 +542,7 @@ Blogs | Profile
                     </a>
                 </div>
             
-            &copy; 2025  All rights reserved
+            &copy; 2026  All rights reserved
             <div class="text-secondary">
                 Made with
                 <span class="text-danger">

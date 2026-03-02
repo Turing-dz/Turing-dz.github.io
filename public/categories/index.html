@@ -329,6 +329,39 @@ Categories | Profile
             <div class="card h-100">
                 
                 <div class="card-header">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+                        <img src="/images/blogs/claudecode.jpeg" class="card-img-top" alt="不翻墙使用Claude-code">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="不翻墙使用Claude-code">不翻墙使用Claude-code</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
+<h1 id="1安装claude_code">1.安装claude_code</h1>
+<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
+</span></span><span style="display:flex;"><span>claude -v
+</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
+<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
+</span></span><span style="display:flex;"><span>vi …</span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Feb 21, 2026</span>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
                     <a href="/blogs/hoge_github/">
                         <img src="/images/blogs/blog.jpeg" class="card-img-top" alt="Hugo和GitHub搭建博客">
                     </a>
@@ -350,6 +383,31 @@ Categories | Profile
                 <div class="mt-auto card-footer">
                     <span class="float-start">Dec 17, 2025</span>
                     <a href="/blogs/hoge_github/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/1.prompt/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title=""></h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">. …</span></span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Jan 1, 0001</span>
+                    <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
                 </div>
             </div>
         </div>
