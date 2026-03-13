@@ -28,21 +28,38 @@
 
 
 
-<meta property="og:url" content="http://localhost:1313/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+<meta property="og:url" content="http://localhost:1313/blogs/2.model/">
   <meta property="og:site_name" content="Profile">
-  <meta property="og:title" content="不翻墙使用Claude-code">
-  <meta property="og:description" content="不翻墙使用Claude-code">
+  <meta property="og:title" content="2.Model">
+  <meta property="og:description" content="参考：https://docs.langchain.com/oss/python/langchain/models
+1.ChatXXX模型实例化(langchain_xxx) LangChain本身不提供自己的LLM，而是提供标准接口。
+LLM使用纯文本作为输入输出的大语言模型。
+ChatModel使用聊天消息列表作为输入并返回聊天消息的聊天模型。
+两种模型接口都接受字符串，PromptValue以及消息列表作为参数，内部会根据模型的类型自动转换成字符串或者消息列表，屏蔽了不同模型的差异。
+1.1.ChatOpenAI dotenv.load_dotenv() chat_model = ChatOpenAI(model=&#34;gpt-3.5-turbo&#34;, base_url=os.getenv(&#34;OPENAI_API_BASE&#34;)) prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;你是人工智能助手，你的名字叫做小z&#34;), (&#34;human&#34;, &#34;{query}&#34;) ]) response = chat_model.invoke(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 1.2.ChatHuggingFace chat_model = ChatHuggingFace( llm=HuggingFaceEndpoint( repo_id=&#34;Qwen/Qwen2.5-7B-Instruct&#34;, max_new_tokens=256, ) ) response = chat_model.invoke(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 1.3.ChatHuggingFace from langchain_ollama import ChatOllama chat_model = ChatOllama(model=&#34;qwen2.5:7b&#34;) chat_model.invoke(&#34;你是谁&#34;).content 2.模型invoke，stream，batch三种运行方式 Invoke:传递对应的文本提示，消息提示，大语言模型生成对应的内容。
+# 1.invoke response = chat_model.invoke(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) # response.__class__ response.content stream：invoke的流失输出版本，大语言模型每生成一个字符就返回一个字符。
+# 2.stream response2 = chat_model.stream(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) for chunk in response2: print(chunk.content, flush=True, end=&#34;&#34;) batch：invoke的批量版本，可以一次行生成多个内容。
+# 3.batch responses = chat_model.batch([ prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;}), prompt.invoke({&#34;query&#34;: &#34;讲个笑话&#34;}), ]) for response in responses: print(response.content) print(&#34;**&#34; * 5) 3.模型多模态 LangChain的消息组件Message有5种类型（SystemMessage,HumanMessage,AIMessage,FunctionMessage,ToolMessage），并且所有的消息都具有type类型，content内容和response_metadata响应元数据。">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="blogs">
-    <meta property="article:published_time" content="2026-02-21T12:31:27+08:00">
-    <meta property="article:modified_time" content="2026-02-21T12:31:27+08:00">
-    <meta property="article:tag" content="Life">
+    <meta property="article:published_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:modified_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:tag" content="Code">
+    <meta property="article:tag" content="Langchain">
 
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="不翻墙使用Claude-code">
-  <meta name="twitter:description" content="不翻墙使用Claude-code">
+  <meta name="twitter:title" content="2.Model">
+  <meta name="twitter:description" content="参考：https://docs.langchain.com/oss/python/langchain/models
+1.ChatXXX模型实例化(langchain_xxx) LangChain本身不提供自己的LLM，而是提供标准接口。
+LLM使用纯文本作为输入输出的大语言模型。
+ChatModel使用聊天消息列表作为输入并返回聊天消息的聊天模型。
+两种模型接口都接受字符串，PromptValue以及消息列表作为参数，内部会根据模型的类型自动转换成字符串或者消息列表，屏蔽了不同模型的差异。
+1.1.ChatOpenAI dotenv.load_dotenv() chat_model = ChatOpenAI(model=&#34;gpt-3.5-turbo&#34;, base_url=os.getenv(&#34;OPENAI_API_BASE&#34;)) prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;你是人工智能助手，你的名字叫做小z&#34;), (&#34;human&#34;, &#34;{query}&#34;) ]) response = chat_model.invoke(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 1.2.ChatHuggingFace chat_model = ChatHuggingFace( llm=HuggingFaceEndpoint( repo_id=&#34;Qwen/Qwen2.5-7B-Instruct&#34;, max_new_tokens=256, ) ) response = chat_model.invoke(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 1.3.ChatHuggingFace from langchain_ollama import ChatOllama chat_model = ChatOllama(model=&#34;qwen2.5:7b&#34;) chat_model.invoke(&#34;你是谁&#34;).content 2.模型invoke，stream，batch三种运行方式 Invoke:传递对应的文本提示，消息提示，大语言模型生成对应的内容。
+# 1.invoke response = chat_model.invoke(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) # response.__class__ response.content stream：invoke的流失输出版本，大语言模型每生成一个字符就返回一个字符。
+# 2.stream response2 = chat_model.stream(prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;})) for chunk in response2: print(chunk.content, flush=True, end=&#34;&#34;) batch：invoke的批量版本，可以一次行生成多个内容。
+# 3.batch responses = chat_model.batch([ prompt.invoke({&#34;query&#34;: &#34;你是谁&#34;}), prompt.invoke({&#34;query&#34;: &#34;讲个笑话&#34;}), ]) for response in responses: print(response.content) print(&#34;**&#34; * 5) 3.模型多模态 LangChain的消息组件Message有5种类型（SystemMessage,HumanMessage,AIMessage,FunctionMessage,ToolMessage），并且所有的消息都具有type类型，content内容和response_metadata响应元数据。">
 
 
 <link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
@@ -106,7 +123,7 @@
 
 
 
-<meta name="description" content="不翻墙使用Claude-code">
+<meta name="description" content="">
 <link rel="stylesheet" href="/css/single.css">
 
 
@@ -117,7 +134,7 @@
   
 
   <title>
-不翻墙使用Claude-code | Profile
+2.Model | Profile
 
   </title>
 </head>
@@ -314,13 +331,13 @@
       <div class="col-sm-12 col-md-12 col-lg-9">
         <div class="pr-lg-4">
           <div class="title mb-5">
-            <h1 class="text-center mb-4">不翻墙使用Claude-code</h1>
+            <h1 class="text-center mb-4">2.Model</h1>
             <div class="text-center">
               
                 Zoe
                 <small>|</small>
               
-              Feb 21, 2026
+              Dec 17, 2025
 
               
               <span id="readingTime">
@@ -331,31 +348,107 @@
           </div>
           
           <div class="featured-image">
-            <img class="img-fluid mx-auto d-block" src="/images/blogs/claudecode.jpeg" alt="不翻墙使用Claude-code">
+            <img class="img-fluid mx-auto d-block" src="/images/blogs/02model.png" alt="2.Model">
           </div>
           
           <article class="page-content  p-2">
-          <p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
-<h1 id="1安装claude_code">1.安装claude_code</h1>
-<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
-</span></span><span style="display:flex;"><span>claude -v
-</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
-<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
-</span></span><span style="display:flex;"><span>vi  ~/.claude/settings.json
-</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;env&#34;</span>: <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ANTHROPIC_API_KEY&#34;</span>: <span style="color:#e6db74">&#34;sk-xxxxxxxxxxxxxxxx&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ANTHROPIC_BASE_URL&#34;</span>: <span style="color:#e6db74">&#34;https://api.openai-proxy.org/anthropic&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
-</span></span></code></pre></div><p>2.进行免登录配置。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>vi ~/.claude.json
-</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;hasCompletedOnboarding&#34;</span>: true
-</span></span></code></pre></div><p>3.最后在自己的项目目录下启动cluade使用。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>claude
+          <p>参考：https://docs.langchain.com/oss/python/langchain/models</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/02model.png" alt="02model"></p>
+<h1 id="1chatxxx模型实例化langchain_xxx">1.ChatXXX模型实例化(langchain_xxx)</h1>
+<p>LangChain本身不提供自己的LLM，而是提供标准接口。</p>
+<p>LLM使用纯文本作为输入输出的大语言模型。</p>
+<p>ChatModel使用聊天消息列表作为输入并返回聊天消息的聊天模型。</p>
+<p>两种模型接口都接受字符串，PromptValue以及消息列表作为参数，内部会根据模型的类型自动转换成字符串或者消息列表，屏蔽了不同模型的差异。</p>
+<h2 id="11chatopenai">1.1.ChatOpenAI</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>chat_model <span style="color:#f92672">=</span> ChatOpenAI(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-3.5-turbo&#34;</span>, base_url<span style="color:#f92672">=</span>os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_BASE&#34;</span>))
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;你是人工智能助手，你的名字叫做小z&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>invoke(prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span></code></pre></div><h2 id="12chathuggingface">1.2.ChatHuggingFace</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>chat_model <span style="color:#f92672">=</span> ChatHuggingFace(
+</span></span><span style="display:flex;"><span>    llm<span style="color:#f92672">=</span>HuggingFaceEndpoint(
+</span></span><span style="display:flex;"><span>        repo_id<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Qwen/Qwen2.5-7B-Instruct&#34;</span>,
+</span></span><span style="display:flex;"><span>        max_new_tokens<span style="color:#f92672">=</span><span style="color:#ae81ff">256</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>invoke(prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span></code></pre></div><h2 id="13chathuggingface">1.3.ChatHuggingFace</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_ollama <span style="color:#f92672">import</span> ChatOllama
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_model <span style="color:#f92672">=</span> ChatOllama(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;qwen2.5:7b&#34;</span>)
+</span></span><span style="display:flex;"><span>chat_model<span style="color:#f92672">.</span>invoke(<span style="color:#e6db74">&#34;你是谁&#34;</span>)<span style="color:#f92672">.</span>content
+</span></span></code></pre></div><h1 id="2模型invokestreambatch三种运行方式">2.模型invoke，stream，batch三种运行方式</h1>
+<p>Invoke:传递对应的文本提示，消息提示，大语言模型生成对应的内容。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 1.invoke</span>
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>invoke(prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># response.__class__</span>
+</span></span><span style="display:flex;"><span>response<span style="color:#f92672">.</span>content
+</span></span></code></pre></div><p>stream：invoke的流失输出版本，大语言模型每生成一个字符就返回一个字符。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 2.stream</span>
+</span></span><span style="display:flex;"><span>response2 <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>stream(prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> response2:
+</span></span><span style="display:flex;"><span>    print(chunk<span style="color:#f92672">.</span>content, flush<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>)
+</span></span></code></pre></div><p>batch：invoke的批量版本，可以一次行生成多个内容。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 3.batch</span>
+</span></span><span style="display:flex;"><span>responses <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>batch([
+</span></span><span style="display:flex;"><span>    prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}),
+</span></span><span style="display:flex;"><span>    prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;讲个笑话&#34;</span>}),
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> response <span style="color:#f92672">in</span> responses:
+</span></span><span style="display:flex;"><span>    print(response<span style="color:#f92672">.</span>content)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;**&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>)
+</span></span></code></pre></div><h1 id="3模型多模态">3.模型多模态</h1>
+<p>LangChain的消息组件Message有5种类型（SystemMessage,HumanMessage,AIMessage,FunctionMessage,ToolMessage），并且所有的消息都具有type类型，content内容和response_metadata响应元数据。</p>
+<h2 id="31多模态输入">3.1.多模态输入</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.output_parsers <span style="color:#f92672">import</span> StrOutputParser
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.prompts <span style="color:#f92672">import</span> ChatPromptTemplate
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_openai <span style="color:#f92672">import</span> ChatOpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1. 创建支持多模态（文本+图片）的提示模板</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;text&#34;</span>, <span style="color:#e6db74">&#34;text&#34;</span>: <span style="color:#e6db74">&#34;简单描述上传的图片&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;image_url&#34;</span>, <span style="color:#e6db74">&#34;image_url&#34;</span>: <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{image_url}</span><span style="color:#e6db74">&#34;</span>}  <span style="color:#75715e"># 图片 URL 占位符</span>
+</span></span><span style="display:flex;"><span>    ])
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOpenAI(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-4o&#34;</span>)
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>invoke({
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;image_url&#34;</span>: <span style="color:#e6db74">&#34;https://upload.wikimedia.org/wikipedia/commons/7/79/Canton_tower_in_asian_games_opening_ceremony.jpg&#34;</span>}))
+</span></span></code></pre></div><h2 id="32多模态输出">3.2.多模态输出</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.tools.openai_dalle_image_generation <span style="color:#f92672">import</span> OpenAIDALLEImageGenerationTool
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.utilities.dalle_image_generator <span style="color:#f92672">import</span> DallEAPIWrapper
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_openai <span style="color:#f92672">import</span> ChatOpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 加载环境变量（如 OpenAI API Key）</span>
+</span></span><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 创建 DALL·E 图像生成工具</span>
+</span></span><span style="display:flex;"><span>dalle <span style="color:#f92672">=</span> OpenAIDALLEImageGenerationTool(
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;openai_dalle&#34;</span>,
+</span></span><span style="display:flex;"><span>    api_wrapper<span style="color:#f92672">=</span>DallEAPIWrapper(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;dall-e-3&#34;</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化语言模型</span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOpenAI(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-4o&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 绑定工具到 LLM（强制使用 DALL·E 工具）</span>
+</span></span><span style="display:flex;"><span>llm_with_tools <span style="color:#f92672">=</span> llm<span style="color:#f92672">.</span>bind_tools(tools<span style="color:#f92672">=</span>[dalle], tool_choice<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;openai_dalle&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 构建链：LLM → 提取工具调用参数 → 执行 DALL·E</span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> llm_with_tools <span style="color:#f92672">|</span> (<span style="color:#66d9ef">lambda</span> msg: msg<span style="color:#f92672">.</span>tool_calls[<span style="color:#ae81ff">0</span>][<span style="color:#e6db74">&#34;args&#34;</span>]) <span style="color:#f92672">|</span> dalle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 调用链生成图像</span>
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>invoke(<span style="color:#e6db74">&#34;帮我绘制一幅两岁中国小女孩儿当医生的可爱图片&#34;</span>))
 </span></span></code></pre></div>
           </article>
         </div>
@@ -368,7 +461,18 @@
                 Table Of Contents
               </h5>
               <div class="toc-content">
-                <nav id="TableOfContents"></nav>
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11chatopenai">1.1.ChatOpenAI</a></li>
+    <li><a href="#12chathuggingface">1.2.ChatHuggingFace</a></li>
+    <li><a href="#13chathuggingface">1.3.ChatHuggingFace</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#31多模态输入">3.1.多模态输入</a></li>
+    <li><a href="#32多模态输出">3.2.多模态输出</a></li>
+  </ul>
+</nav>
               </div>
           </aside>
           
@@ -378,9 +482,13 @@
             <h5>Tags</h5>
             <ul class="tags-ul list-unstyled list-inline">
               
-              <li class="list-inline-item"><a href="http://localhost:1313/tags/life"
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/code"
                 target="_blank"
-              >life</a></li>
+              >code</a></li>
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/langchain"
+                target="_blank"
+              >langchain</a></li>
               
             </ul>
           </aside>
@@ -392,22 +500,22 @@
             <div class="social-content">
               <ul class="list-inline">
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2f2.model%2f">
                     <i class="fab fa-linkedin"></i>
                   </a>
                 </li>
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href='https://twitter.com/share?text=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f&hashtags=life'>
+                  <a target="_blank" href='https://twitter.com/share?text=2.Model&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f2.model%2f&hashtags=code%2clangchain'>
                     <i class="fab fa-twitter"></i>
                   </a>
                 </li>
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href="https://api.whatsapp.com/send?text=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code: http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=2.Model: http%3a%2f%2flocalhost%3a1313%2fblogs%2f2.model%2f">
                     <i class="fab fa-whatsapp"></i>
                   </a>
                 </li>
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href='mailto:?subject=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f'>
+                  <a target="_blank" href='mailto:?subject=2.Model&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f2.model%2f'>
                     <i class="fa fa-envelope"></i>
                   </a>
                 </li>

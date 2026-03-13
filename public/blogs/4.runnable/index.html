@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+<link rel="icon" href=/fav.png type="image/gif">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      media="print" onload="this.media='all'" />
+<noscript>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
+</noscript>
+
+
+<link rel="stylesheet" href="/css/font.css" media="all">
+
+
+
+<meta property="og:url" content="http://localhost:1313/blogs/4.runnable/">
+  <meta property="og:site_name" content="Profile">
+  <meta property="og:title" content="4.Runnable">
+  <meta property="og:description" content="参考：https://reference.langchain.com/python/langchain-core/runnables
+LangChain中绝大部分组件实现了Runnable协议执行接口，定义了一套标准方法。
+stream：将组件的响应块流式返回，如果组件不支持流式则会直接输出。astream（异步版本）
+invoke：调用组件并得到对应的结果。ainvoke（异步版本）
+batch：批量调用组件并得到对应的结果。abatch（异步版本）
+astream_log：除了流失返回最终响应块之外，还会流式返回中间步骤。
+LangChain重写了__or__和__ror__方法，因此所有Runnable组件都可以通过｜或者pipe()方法将多个组件拼成链运行。
+实现 Runnable 接口组件的输入和输出类型因组件而异，如下
+组件 输入类型 输出类型 Prompt Dict PromptValue ChatModel String,PromptValue,MessageList ChatMessage LLM String,PromptValue,MessageList String OutputParser LLM/ChatModel的输出 取决于解析器 Retriever String List of Document文档列表 Tool String,Dict,取决于工具所需输入 取决于工具规定输出 大部分runnable组件继承了RunnableSerializable，而RunnableSerializable继承自 Runnable，又增加了可序列化能力，支持保存为 JSON，支持 LangSmith 记录，支持远程部署，支持 graph 导出。
+1.常见的Runnable实现 1.1.串行RunnableSequence 串联多个 Runnable，前一个的输出是后一个的输入
+prompt = ChatPromptTemplate.from_template(&#34;讲个{topic}相关的笑话&#34;) chain = RunnableSequence(prompt, chat_llm, StrOutputParser())# chain = prompt | chat_llm | StrOutputParser() 1.2.并行RunnableParallel 并行执行多个 Runnable，将结果组合为字典。
+prompt_joke = ChatPromptTemplate.from_template(&#34;写一个{subject}相关的笑话&#34;) prompt_poem = ChatPromptTemplate.from_template(&#34;写一个{subject}相关的诗&#34;) chain_joke = prompt_joke | chat_llm | StrOutputParser() chain_poem = prompt_poem | chat_llm | StrOutputParser() # chains = RunnableParallel({&#34;joke&#34;: chain_joke, &#34;poem&#34;: chain_poem}) chains = RunnableParallel(joke=chain_joke, poem=chain_poem) res = chains.invoke({&#34;subject&#34;: &#34;天气&#34;}) 1.3.RunnableLambda把函数包装成 Runnable # 将任意 Python 函数封装为 Runnable。适用场景：插入自定义逻辑（如数据清洗、格式转换）。 def retrieval(query: str) -&gt; str: &#34;&#34;&#34;模拟检索器&#34;&#34;&#34; print(&#34;正在检索...&#34;) return &#34;我是小z&#34; prompt = ChatPromptTemplate.from_template(&#34;&#34;&#34;参考上下文内容回答用户问题 &lt;context&gt; {context} &lt;/context&gt; 用户问题是：{query} &#34;&#34;&#34;) query = &#34;我是谁&#34; runnable_retrieval = RunnableLambda( lambda x: { &#34;context&#34;: retrieval(x[&#34;query&#34;]), &#34;query&#34;: x[&#34;query&#34;], } ) chain = runnable_retrieval | prompt | chat_llm | StrOutputParser() res = chain.invoke({&#34;query&#34;: query}) 1.4.透传 RunnablePassthrough # 直接传递输入，不做任何修改。适用场景：在并行链中保持原始输入不变。 def retrieval(query: str) -&gt; str: &#34;&#34;&#34;模拟检索器&#34;&#34;&#34; print(&#34;正在检索...&#34;) return &#34;我是小z&#34; prompt = ChatPromptTemplate.from_template(&#34;&#34;&#34;参考上下文内容回答用户问题 &lt;context&gt; {context} &lt;/context&gt; 用户问题是：{query} &#34;&#34;&#34;) llm = ChatOllama(model=&#34;qwen2.5:7b&#34;) query = &#34;我是谁&#34; # chain = { # &#34;context&#34;: lambda x: retrieval(x), # &#34;query&#34;: lambda x: x # } | prompt | llm | parser # chain = { # &#34;context&#34;: retrieval, # &#34;query&#34;: RunnablePassthrough() #RunnablePassthrough就是invoke传递的是什么就是什么 # } | prompt | llm | StrOutputParser() chain = RunnablePassthrough.assign(context=lambda x: retrieval(x)) | prompt | llm | StrOutputParser() res = chain.invoke(query) print(res) 1.5.分支执行RunnableBranch # 根据条件选择执行不同的分支。适用场景：动态路由（如根据输入类型选择不同处理路径）。 prompt_coder = ChatPromptTemplate.from_template(&#34;写一个程序员相关的{subject}的诗&#34;) prompt_boss = ChatPromptTemplate.from_template(&#34;写一个老板相关的{subject}的诗&#34;) prompt_free = ChatPromptTemplate.from_template(&#34;写一个躺平相关的{subject}的诗&#34;) chain_coder = prompt_coder | chat_llm | StrOutputParser() chain_boss = prompt_boss | chat_llm | StrOutputParser() chain_free = prompt_free | chat_llm | StrOutputParser() branch = RunnableBranch( (lambda x: &#34;bug&#34; in x.get(&#34;subject&#34;, &#34;&#34;), chain_coder), (lambda x: &#34;开会&#34; in x.get(&#34;subject&#34;, &#34;&#34;), chain_boss), chain_free ) print(branch.invoke({&#34;subject&#34;: &#34;天天写bug&#34;})) print(&#34;==&#34; * 20) print(branch.invoke({&#34;subject&#34;: &#34;天天开会&#34;})) print(&#34;==&#34; * 20) print(branch.invoke({&#34;subject&#34;: &#34;睡大觉&#34;})) 1.6.多轮对话 RunnableWithMessageHistory # 为链添加对话历史管理。适用场景：聊天机器人、多轮对话。 # 会话历史存储字典（用于缓存） store = {} def get_session_history(session_id: str) -&gt; BaseChatMessageHistory: if session_id not in store: # 创建文件存储的聊天历史对象 store[session_id] = FileChatMessageHistory(f&#34;./chat_history_{session_id}.txt&#34;) return store[session_id] prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;你是一个强大的聊天机器人，请根据用户的需求回复问题。&#34;), MessagesPlaceholder(&#34;history&#34;), (&#34;human&#34;, &#34;{query}&#34;), ]) chain = prompt | chat_llm | StrOutputParser() with_message_chain = RunnableWithMessageHistory(chain, get_session_history, input_messages_key=&#34;query&#34;, history_messages_key=&#34;history&#34;) while True: query = input(&#34;Human: &#34;) print(query) if query == &#34;quite&#34;: break else: response = with_message_chain.stream( input={&#34;query&#34;: query}, config={&#34;configurable&#34;: {&#34;session_id&#34;: &#34;z&#34;}} ) print(&#34;AI: &#34;, flush=True, end=&#34;&#34;) for chunk in response: print(chunk, flush=True, end=&#34;&#34;) print(&#34;&#34;) 2.Runnable组件常用方法 2.1.提前绑定参数bind bind函数用于修改Runnable底层的默认调用参数。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blogs">
+    <meta property="article:published_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:modified_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:tag" content="Code">
+    <meta property="article:tag" content="Langchain">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="4.Runnable">
+  <meta name="twitter:description" content="参考：https://reference.langchain.com/python/langchain-core/runnables
+LangChain中绝大部分组件实现了Runnable协议执行接口，定义了一套标准方法。
+stream：将组件的响应块流式返回，如果组件不支持流式则会直接输出。astream（异步版本）
+invoke：调用组件并得到对应的结果。ainvoke（异步版本）
+batch：批量调用组件并得到对应的结果。abatch（异步版本）
+astream_log：除了流失返回最终响应块之外，还会流式返回中间步骤。
+LangChain重写了__or__和__ror__方法，因此所有Runnable组件都可以通过｜或者pipe()方法将多个组件拼成链运行。
+实现 Runnable 接口组件的输入和输出类型因组件而异，如下
+组件 输入类型 输出类型 Prompt Dict PromptValue ChatModel String,PromptValue,MessageList ChatMessage LLM String,PromptValue,MessageList String OutputParser LLM/ChatModel的输出 取决于解析器 Retriever String List of Document文档列表 Tool String,Dict,取决于工具所需输入 取决于工具规定输出 大部分runnable组件继承了RunnableSerializable，而RunnableSerializable继承自 Runnable，又增加了可序列化能力，支持保存为 JSON，支持 LangSmith 记录，支持远程部署，支持 graph 导出。
+1.常见的Runnable实现 1.1.串行RunnableSequence 串联多个 Runnable，前一个的输出是后一个的输入
+prompt = ChatPromptTemplate.from_template(&#34;讲个{topic}相关的笑话&#34;) chain = RunnableSequence(prompt, chat_llm, StrOutputParser())# chain = prompt | chat_llm | StrOutputParser() 1.2.并行RunnableParallel 并行执行多个 Runnable，将结果组合为字典。
+prompt_joke = ChatPromptTemplate.from_template(&#34;写一个{subject}相关的笑话&#34;) prompt_poem = ChatPromptTemplate.from_template(&#34;写一个{subject}相关的诗&#34;) chain_joke = prompt_joke | chat_llm | StrOutputParser() chain_poem = prompt_poem | chat_llm | StrOutputParser() # chains = RunnableParallel({&#34;joke&#34;: chain_joke, &#34;poem&#34;: chain_poem}) chains = RunnableParallel(joke=chain_joke, poem=chain_poem) res = chains.invoke({&#34;subject&#34;: &#34;天气&#34;}) 1.3.RunnableLambda把函数包装成 Runnable # 将任意 Python 函数封装为 Runnable。适用场景：插入自定义逻辑（如数据清洗、格式转换）。 def retrieval(query: str) -&gt; str: &#34;&#34;&#34;模拟检索器&#34;&#34;&#34; print(&#34;正在检索...&#34;) return &#34;我是小z&#34; prompt = ChatPromptTemplate.from_template(&#34;&#34;&#34;参考上下文内容回答用户问题 &lt;context&gt; {context} &lt;/context&gt; 用户问题是：{query} &#34;&#34;&#34;) query = &#34;我是谁&#34; runnable_retrieval = RunnableLambda( lambda x: { &#34;context&#34;: retrieval(x[&#34;query&#34;]), &#34;query&#34;: x[&#34;query&#34;], } ) chain = runnable_retrieval | prompt | chat_llm | StrOutputParser() res = chain.invoke({&#34;query&#34;: query}) 1.4.透传 RunnablePassthrough # 直接传递输入，不做任何修改。适用场景：在并行链中保持原始输入不变。 def retrieval(query: str) -&gt; str: &#34;&#34;&#34;模拟检索器&#34;&#34;&#34; print(&#34;正在检索...&#34;) return &#34;我是小z&#34; prompt = ChatPromptTemplate.from_template(&#34;&#34;&#34;参考上下文内容回答用户问题 &lt;context&gt; {context} &lt;/context&gt; 用户问题是：{query} &#34;&#34;&#34;) llm = ChatOllama(model=&#34;qwen2.5:7b&#34;) query = &#34;我是谁&#34; # chain = { # &#34;context&#34;: lambda x: retrieval(x), # &#34;query&#34;: lambda x: x # } | prompt | llm | parser # chain = { # &#34;context&#34;: retrieval, # &#34;query&#34;: RunnablePassthrough() #RunnablePassthrough就是invoke传递的是什么就是什么 # } | prompt | llm | StrOutputParser() chain = RunnablePassthrough.assign(context=lambda x: retrieval(x)) | prompt | llm | StrOutputParser() res = chain.invoke(query) print(res) 1.5.分支执行RunnableBranch # 根据条件选择执行不同的分支。适用场景：动态路由（如根据输入类型选择不同处理路径）。 prompt_coder = ChatPromptTemplate.from_template(&#34;写一个程序员相关的{subject}的诗&#34;) prompt_boss = ChatPromptTemplate.from_template(&#34;写一个老板相关的{subject}的诗&#34;) prompt_free = ChatPromptTemplate.from_template(&#34;写一个躺平相关的{subject}的诗&#34;) chain_coder = prompt_coder | chat_llm | StrOutputParser() chain_boss = prompt_boss | chat_llm | StrOutputParser() chain_free = prompt_free | chat_llm | StrOutputParser() branch = RunnableBranch( (lambda x: &#34;bug&#34; in x.get(&#34;subject&#34;, &#34;&#34;), chain_coder), (lambda x: &#34;开会&#34; in x.get(&#34;subject&#34;, &#34;&#34;), chain_boss), chain_free ) print(branch.invoke({&#34;subject&#34;: &#34;天天写bug&#34;})) print(&#34;==&#34; * 20) print(branch.invoke({&#34;subject&#34;: &#34;天天开会&#34;})) print(&#34;==&#34; * 20) print(branch.invoke({&#34;subject&#34;: &#34;睡大觉&#34;})) 1.6.多轮对话 RunnableWithMessageHistory # 为链添加对话历史管理。适用场景：聊天机器人、多轮对话。 # 会话历史存储字典（用于缓存） store = {} def get_session_history(session_id: str) -&gt; BaseChatMessageHistory: if session_id not in store: # 创建文件存储的聊天历史对象 store[session_id] = FileChatMessageHistory(f&#34;./chat_history_{session_id}.txt&#34;) return store[session_id] prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;你是一个强大的聊天机器人，请根据用户的需求回复问题。&#34;), MessagesPlaceholder(&#34;history&#34;), (&#34;human&#34;, &#34;{query}&#34;), ]) chain = prompt | chat_llm | StrOutputParser() with_message_chain = RunnableWithMessageHistory(chain, get_session_history, input_messages_key=&#34;query&#34;, history_messages_key=&#34;history&#34;) while True: query = input(&#34;Human: &#34;) print(query) if query == &#34;quite&#34;: break else: response = with_message_chain.stream( input={&#34;query&#34;: query}, config={&#34;configurable&#34;: {&#34;session_id&#34;: &#34;z&#34;}} ) print(&#34;AI: &#34;, flush=True, end=&#34;&#34;) for chunk in response: print(chunk, flush=True, end=&#34;&#34;) print(&#34;&#34;) 2.Runnable组件常用方法 2.1.提前绑定参数bind bind函数用于修改Runnable底层的默认调用参数。">
+
+
+<link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
+<link rel="stylesheet" href="/css/footer.css" media="all">
+
+
+<link rel="stylesheet" href="/css/theme.css" media="all">
+
+<style>
+    :root {
+        --text-color: #343a40;
+        --text-secondary-color: #6c757d;
+        --text-link-color: #007bff;
+        --background-color: #eaedf0;
+        --secondary-background-color: #64ffda1a;
+        --primary-color: #007bff;
+        --secondary-color: #f8f9fa;
+
+         
+        --text-color-dark: #e4e6eb;
+        --text-secondary-color-dark: #b0b3b8;
+        --text-link-color-dark: #ffffff;
+        --background-color-dark: #18191a;
+        --secondary-background-color-dark: #212529;
+        --primary-color-dark: #ffffff;
+        --secondary-color-dark: #212529;
+    }
+    body {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    html {
+        background-color: var(--background-color) !important;
+    }
+
+    body::-webkit-scrollbar {
+        height: 0px;
+        width: 8px;
+        background-color: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 1rem;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 1rem;
+        background: #b0b0b0;
+        outline: 1px solid var(--background-color);
+    }
+
+    #search-content::-webkit-scrollbar {
+        width: .5em;
+        height: .1em;
+        background-color: var(--background-color);
+    }
+</style>
+
+
+
+<meta name="description" content="">
+<link rel="stylesheet" href="/css/single.css">
+
+
+<script defer src="/fontawesome-6/all-6.4.2.js"></script>
+
+
+  
+  
+
+  <title>
+4.Runnable | Profile
+
+  </title>
+</head>
+
+<body class="light">
+  
+  
+<script>
+    let localStorageValue = localStorage.getItem("pref-theme");
+    let mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    switch (localStorageValue) {
+        case "dark":
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            break;
+        case "light":
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            break;
+        default:
+            if (mediaQuery) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            }
+            break;
+    }
+</script>
+
+
+
+
+<script>
+    var prevScrollPos = window.pageYOffset;
+    window.addEventListener("scroll", function showHeaderOnScroll() {
+        let profileHeaderElem = document.getElementById("profileHeader");
+        let currentScrollPos = window.pageYOffset;
+        let resetHeaderStyle = false;
+        let showNavBarOnScrollUp =  true ;
+        let showNavBar = showNavBarOnScrollUp ? prevScrollPos > currentScrollPos : currentScrollPos > 0;
+        if (showNavBar) {
+            profileHeaderElem.classList.add("showHeaderOnTop");
+        } else {
+            resetHeaderStyle = true;
+        }
+        if(currentScrollPos === 0) {
+            resetHeaderStyle = true;
+        }
+        if(resetHeaderStyle) {
+            profileHeaderElem.classList.remove("showHeaderOnTop");
+        }
+        prevScrollPos = currentScrollPos;
+    });
+</script>
+
+
+
+<header id="profileHeader">
+    <nav class="pt-3 navbar navbar-expand-lg animate">
+        <div class="container-fluid mx-xs-2 mx-sm-5 mx-md-5 mx-lg-5">
+            
+            <a class="navbar-brand primary-font text-wrap" href="/">
+                
+                <img src="/fav.png" width="30" height="30"
+                    class="d-inline-block align-top">
+                Profile
+                
+            </a>
+
+            
+                <div>
+                    <input id="search" autocomplete="off" class="form-control mr-sm-2 d-none d-md-block" placeholder='Ctrl &#43; k to Search...'
+                        aria-label="Search" oninput="searchOnChange(event)">
+                </div>
+            
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true">
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </button>
+
+            
+            <div class="collapse navbar-collapse text-wrap primary-font" id="navbarContent">
+                <ul class="navbar-nav ms-auto text-center">
+                    
+                        <li class="nav-item navbar-text d-block d-md-none">
+                            <div class="nav-link">
+                                <input id="search" autocomplete="off" class="form-control mr-sm-2" placeholder='Ctrl &#43; k to Search...' aria-label="Search" oninput="searchOnChange(event)">
+                            </div>
+                        </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#about" aria-label="about">
+                            About Me
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#experience"
+                            aria-label="experience">
+                            Experience
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#education"
+                            aria-label="education">
+                            Education
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#contact"
+                            aria-label="contact">
+                            Contact
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/blogs" title="Blog posts">
+                            
+                            Blog
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/gallery" title="Blog posts">
+                            
+                            Gallery
+                        </a>
+                    </li>
+                    
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        
+                        <div class="text-center">
+                            <button id="theme-toggle">
+                                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                    
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+<div id="content">
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">4.Runnable</h1>
+            <div class="text-center">
+              
+                Zoe
+                <small>|</small>
+              
+              Dec 17, 2025
+
+              
+              <span id="readingTime">
+                min read
+              </span>
+              
+            </div>
+          </div>
+          
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="/images/blogs/04runnable.png" alt="4.Runnable">
+          </div>
+          
+          <article class="page-content  p-2">
+          <p>参考：https://reference.langchain.com/python/langchain-core/runnables</p>
+<p>LangChain中绝大部分组件实现了Runnable协议执行接口，定义了一套标准方法。</p>
+<p>stream：将组件的响应块流式返回，如果组件不支持流式则会直接输出。astream（异步版本）</p>
+<p>invoke：调用组件并得到对应的结果。ainvoke（异步版本）</p>
+<p>batch：批量调用组件并得到对应的结果。abatch（异步版本）</p>
+<p>astream_log：除了流失返回最终响应块之外，还会流式返回中间步骤。</p>
+<p>LangChain重写了__or__和__ror__方法，因此所有Runnable组件都可以通过｜或者pipe()方法将多个组件拼成链运行。</p>
+<p>实现 Runnable 接口组件的输入和输出类型因组件而异，如下</p>
+<table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>输入类型</th>
+          <th>输出类型</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Prompt</td>
+          <td>Dict</td>
+          <td>PromptValue</td>
+      </tr>
+      <tr>
+          <td>ChatModel</td>
+          <td>String,PromptValue,MessageList</td>
+          <td>ChatMessage</td>
+      </tr>
+      <tr>
+          <td>LLM</td>
+          <td>String,PromptValue,MessageList</td>
+          <td>String</td>
+      </tr>
+      <tr>
+          <td>OutputParser</td>
+          <td>LLM/ChatModel的输出</td>
+          <td>取决于解析器</td>
+      </tr>
+      <tr>
+          <td>Retriever</td>
+          <td>String</td>
+          <td>List of Document文档列表</td>
+      </tr>
+      <tr>
+          <td>Tool</td>
+          <td>String,Dict,取决于工具所需输入</td>
+          <td>取决于工具规定输出</td>
+      </tr>
+  </tbody>
+</table>
+<p>大部分runnable组件继承了RunnableSerializable，而RunnableSerializable继承自 Runnable，又增加了可序列化能力，支持保存为 JSON，支持 LangSmith 记录，支持远程部署，支持 graph 导出。</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/04runnable.png" alt="04runnable"></p>
+<h1 id="1常见的runnable实现">1.常见的Runnable实现</h1>
+<h2 id="11串行runnablesequence">1.1.串行RunnableSequence</h2>
+<p>串联多个 Runnable，前一个的输出是后一个的输入</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;讲个</span><span style="color:#e6db74">{topic}</span><span style="color:#e6db74">相关的笑话&#34;</span>)
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> RunnableSequence(prompt, chat_llm, StrOutputParser())<span style="color:#75715e"># chain = prompt | chat_llm | StrOutputParser()</span>
+</span></span></code></pre></div><h2 id="12并行runnableparallel">1.2.并行RunnableParallel</h2>
+<p>并行执行多个 Runnable，将结果组合为字典。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>prompt_joke <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;写一个</span><span style="color:#e6db74">{subject}</span><span style="color:#e6db74">相关的笑话&#34;</span>)
+</span></span><span style="display:flex;"><span>prompt_poem <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;写一个</span><span style="color:#e6db74">{subject}</span><span style="color:#e6db74">相关的诗&#34;</span>)
+</span></span><span style="display:flex;"><span>chain_joke <span style="color:#f92672">=</span> prompt_joke <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>chain_poem <span style="color:#f92672">=</span> prompt_poem <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chains = RunnableParallel({&#34;joke&#34;: chain_joke, &#34;poem&#34;: chain_poem})</span>
+</span></span><span style="display:flex;"><span>chains <span style="color:#f92672">=</span> RunnableParallel(joke<span style="color:#f92672">=</span>chain_joke, poem<span style="color:#f92672">=</span>chain_poem)
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chains<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;subject&#34;</span>: <span style="color:#e6db74">&#34;天气&#34;</span>})
+</span></span></code></pre></div><h2 id="13runnablelambda把函数包装成-runnable">1.3.RunnableLambda把函数包装成 Runnable</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 将任意 Python 函数封装为 Runnable。适用场景：插入自定义逻辑（如数据清洗、格式转换）。</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">retrieval</span>(query: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;模拟检索器&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;正在检索...&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;我是小z&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;&#34;&#34;参考上下文内容回答用户问题
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&lt;context&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{context}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&lt;/context&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">用户问题是：</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>query <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;我是谁&#34;</span>
+</span></span><span style="display:flex;"><span>runnable_retrieval <span style="color:#f92672">=</span> RunnableLambda(
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">lambda</span> x: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;context&#34;</span>: retrieval(x[<span style="color:#e6db74">&#34;query&#34;</span>]),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;query&#34;</span>: x[<span style="color:#e6db74">&#34;query&#34;</span>],
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> runnable_retrieval <span style="color:#f92672">|</span> prompt <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: query})
+</span></span></code></pre></div><h2 id="14透传-runnablepassthrough">1.4.透传 RunnablePassthrough</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 直接传递输入，不做任何修改。适用场景：在并行链中保持原始输入不变。</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">retrieval</span>(query: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;模拟检索器&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;正在检索...&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;我是小z&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;&#34;&#34;参考上下文内容回答用户问题
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&lt;context&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{context}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&lt;/context&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">用户问题是：</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOllama(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;qwen2.5:7b&#34;</span>)
+</span></span><span style="display:flex;"><span>query <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;我是谁&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chain = {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             &#34;context&#34;: lambda x: retrieval(x),</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             &#34;query&#34;: lambda x: x</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         } | prompt | llm | parser</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chain = {</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             &#34;context&#34;: retrieval,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             &#34;query&#34;: RunnablePassthrough()  #RunnablePassthrough就是invoke传递的是什么就是什么</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         } | prompt | llm | StrOutputParser()</span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> RunnablePassthrough<span style="color:#f92672">.</span>assign(context<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> x: retrieval(x)) <span style="color:#f92672">|</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke(query)
+</span></span><span style="display:flex;"><span>print(res)
+</span></span></code></pre></div><h2 id="15分支执行runnablebranch">1.5.分支执行RunnableBranch</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 根据条件选择执行不同的分支。适用场景：动态路由（如根据输入类型选择不同处理路径）。</span>
+</span></span><span style="display:flex;"><span>prompt_coder <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;写一个程序员相关的</span><span style="color:#e6db74">{subject}</span><span style="color:#e6db74">的诗&#34;</span>)
+</span></span><span style="display:flex;"><span>prompt_boss <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;写一个老板相关的</span><span style="color:#e6db74">{subject}</span><span style="color:#e6db74">的诗&#34;</span>)
+</span></span><span style="display:flex;"><span>prompt_free <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;写一个躺平相关的</span><span style="color:#e6db74">{subject}</span><span style="color:#e6db74">的诗&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chain_coder <span style="color:#f92672">=</span> prompt_coder <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>chain_boss <span style="color:#f92672">=</span> prompt_boss <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>chain_free <span style="color:#f92672">=</span> prompt_free <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>branch <span style="color:#f92672">=</span> RunnableBranch(
+</span></span><span style="display:flex;"><span>    (<span style="color:#66d9ef">lambda</span> x: <span style="color:#e6db74">&#34;bug&#34;</span> <span style="color:#f92672">in</span> x<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;subject&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>), chain_coder),
+</span></span><span style="display:flex;"><span>    (<span style="color:#66d9ef">lambda</span> x: <span style="color:#e6db74">&#34;开会&#34;</span> <span style="color:#f92672">in</span> x<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;subject&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>), chain_boss),
+</span></span><span style="display:flex;"><span>    chain_free
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(branch<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;subject&#34;</span>: <span style="color:#e6db74">&#34;天天写bug&#34;</span>}))
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;==&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>print(branch<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;subject&#34;</span>: <span style="color:#e6db74">&#34;天天开会&#34;</span>}))
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;==&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>print(branch<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;subject&#34;</span>: <span style="color:#e6db74">&#34;睡大觉&#34;</span>}))
+</span></span></code></pre></div><h2 id="16多轮对话-runnablewithmessagehistory">1.6.多轮对话 RunnableWithMessageHistory</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 为链添加对话历史管理。适用场景：聊天机器人、多轮对话。</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 会话历史存储字典（用于缓存）</span>
+</span></span><span style="display:flex;"><span>store <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_session_history</span>(session_id: str) <span style="color:#f92672">-&gt;</span> BaseChatMessageHistory:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> session_id <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> store:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 创建文件存储的聊天历史对象</span>
+</span></span><span style="display:flex;"><span>        store[session_id] <span style="color:#f92672">=</span> FileChatMessageHistory(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;./chat_history_</span><span style="color:#e6db74">{</span>session_id<span style="color:#e6db74">}</span><span style="color:#e6db74">.txt&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> store[session_id]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;你是一个强大的聊天机器人，请根据用户的需求回复问题。&#34;</span>),
+</span></span><span style="display:flex;"><span>    MessagesPlaceholder(<span style="color:#e6db74">&#34;history&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>with_message_chain <span style="color:#f92672">=</span> RunnableWithMessageHistory(chain, get_session_history, input_messages_key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;query&#34;</span>,
+</span></span><span style="display:flex;"><span>                                                history_messages_key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;history&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>    query <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;Human: &#34;</span>)
+</span></span><span style="display:flex;"><span>    print(query)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> query <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;quite&#34;</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> with_message_chain<span style="color:#f92672">.</span>stream(
+</span></span><span style="display:flex;"><span>            input<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;query&#34;</span>: query},
+</span></span><span style="display:flex;"><span>            config<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;configurable&#34;</span>: {<span style="color:#e6db74">&#34;session_id&#34;</span>: <span style="color:#e6db74">&#34;z&#34;</span>}}
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;AI: &#34;</span>, flush<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> response:
+</span></span><span style="display:flex;"><span>            print(chunk, flush<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;&#34;</span>)
+</span></span></code></pre></div><h1 id="2runnable组件常用方法">2.Runnable组件常用方法</h1>
+<h2 id="21提前绑定参数bind">2.1.提前绑定参数bind</h2>
+<p>bind函数用于修改Runnable底层的默认调用参数。</p>
+<p><code>.bind()</code> 函数是在构建应用的时候添加上对应的默认调用参数，而在 <code>Runnable.bind()</code> 函数的底层，本质上是往 <code>Runnable</code> 的 <code>kwargs</code> 属性添加对应的字段，并生成一个新的 <code>Runnable</code>，当 <code>Runnable</code> 组件执行调用时（<code>invoke</code>、<code>ainvoke</code>、<code>stream</code>、<code>astream</code>、<code>batch</code>、<code>abatch</code> 等），会自动将 <code>kwargs</code> 字段里的所有参数合并并覆盖默认调用参数。</p>
+<p>bind函数只能绑定运行时参数。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 如果要将一个函数编程runnable组件，可以通过runnablelambda函数进行包装，所有的runnable组件的invoke函数智能传递一个参数，类型不限。所以如果想要传递多个参数，就用bind方法。</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_weather</span>(location: str, unit: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># print(location, unit)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>location<span style="color:#e6db74">}</span><span style="color:#e6db74">的天气为</span><span style="color:#e6db74">{</span>random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">40</span>)<span style="color:#e6db74">}{</span>unit<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># bind方法其实就是吧bind的参数进行了绑定并生成一个新的runnable组件</span>
+</span></span><span style="display:flex;"><span>get_weather_runnable <span style="color:#f92672">=</span> RunnableLambda(get_weather)<span style="color:#f92672">.</span>bind(unit<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;度&#34;</span>)  <span style="color:#75715e"># 自定义函数变成一个runnable组件</span>
+</span></span><span style="display:flex;"><span>print(get_weather_runnable<span style="color:#f92672">.</span>kwargs)
+</span></span><span style="display:flex;"><span>resp <span style="color:#f92672">=</span> get_weather_runnable<span style="color:#f92672">.</span>invoke(<span style="color:#e6db74">&#34;北京&#34;</span>)
+</span></span></code></pre></div><h2 id="22invoke时通过with_config绑定参数configurable_fields">2.2.invoke时通过with_config绑定参数configurable_fields</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 1.先使用ConfigurableField在runnable上规定哪个参数是在运行时要传递的</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;生成一个小于</span><span style="color:#e6db74">{x}</span><span style="color:#e6db74">的随机数&#34;</span>)
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> chat_llm<span style="color:#f92672">.</span>configurable_fields(
+</span></span><span style="display:flex;"><span>    temperature<span style="color:#f92672">=</span>ConfigurableField(
+</span></span><span style="display:flex;"><span>        id<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;llm_temperature&#34;</span>,
+</span></span><span style="display:flex;"><span>        name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;模型温度值&#34;</span>,
+</span></span><span style="display:flex;"><span>        description<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;温度越低随机性越低&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;x&#34;</span>: <span style="color:#ae81ff">100</span>})
+</span></span><span style="display:flex;"><span>print(res)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;****&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.runnable在invoke的时候通过config传递configurable值（字典，键是第一步定义的id）</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># res = chain.invoke({&#34;x&#34;: 100}, config={&#34;configurable&#34;: {&#34;llm_temperature&#34;: 0}})</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.在 Runnable 的 invoke 或 ainvoke 方法中显式接收 config 参数，并在内部逻辑中解析和应用配置。</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># res = chain.invoke({&#34;x&#34;: 100}, config=RunnableConfig(configurable={&#34;llm_temperature&#34;: 0}))</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.runnable的with_config方法进行配置</span>
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>with_config({<span style="color:#e6db74">&#34;configurable&#34;</span>: {<span style="color:#e6db74">&#34;llm_temperature&#34;</span>: <span style="color:#ae81ff">0</span>}})<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;x&#34;</span>: <span style="color:#ae81ff">100</span>})
+</span></span><span style="display:flex;"><span>print(res)
+</span></span></code></pre></div><h2 id="23invoke时改变配置configurable_alternatives">2.3.invoke时改变配置configurable_alternatives</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.对runnable组件进行configurable_alternatives替换配置,要配置唯一的id,然后配置新runnable，第二步用到id和runnable的名字</span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> chat_llm<span style="color:#f92672">.</span>configurable_alternatives(
+</span></span><span style="display:flex;"><span>    ConfigurableField(id<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;llm&#34;</span>), llm3<span style="color:#f92672">=</span>ChatOllama(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;llama3&#34;</span>))
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.运行时config传递改的runnable</span>
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是哪个模型&#34;</span>}, config<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;configurable&#34;</span>: {<span style="color:#e6db74">&#34;llm&#34;</span>: <span style="color:#e6db74">&#34;llm3&#34;</span>}})
+</span></span></code></pre></div><h2 id="24绑定容错机制-重试with_retry和回退with_fallbacks">2.4.绑定容错机制-重试with_retry和回退with_fallbacks</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>a <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">foo</span>(x):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">global</span> a
+</span></span><span style="display:flex;"><span>    x <span style="color:#f92672">=</span> a <span style="color:#f92672">+</span> x
+</span></span><span style="display:flex;"><span>    a <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    print(x)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">5</span> <span style="color:#f92672">/</span> x
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> RunnableLambda(foo)<span style="color:#f92672">.</span>with_retry(stop_after_attempt<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>print(res)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOllama(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;qwen2.5:8b&#34;</span>)<span style="color:#f92672">.</span>with_fallbacks([ChatOllama(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;qwen2.5:7b&#34;</span>)])
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>})
+</span></span><span style="display:flex;"><span>print(res)
+</span></span></code></pre></div><h2 id="25周期回调callbacks">2.5.周期回调callbacks</h2>
+<table>
+  <thead>
+      <tr>
+          <th>事件名称</th>
+          <th style="text-align: center">触发时机</th>
+          <th>对应回调函数</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>LLM start</td>
+          <td style="text-align: center">当大语言模型启动时</td>
+          <td>on_llm_start</td>
+      </tr>
+      <tr>
+          <td>LLM new token</td>
+          <td style="text-align: center">当聊天模型或大语言模型生成新 token 时</td>
+          <td>on_llm_new_token</td>
+      </tr>
+      <tr>
+          <td>LLM end</td>
+          <td style="text-align: center">当聊天模型或大语言模型结束时</td>
+          <td>on_llm_end</td>
+      </tr>
+      <tr>
+          <td>LLM error</td>
+          <td style="text-align: center">当聊天模型或大语言模型发生错误时</td>
+          <td>on_llm_error</td>
+      </tr>
+      <tr>
+          <td>Chain start</td>
+          <td style="text-align: center">当链开始运行时</td>
+          <td>on_chain_start</td>
+      </tr>
+      <tr>
+          <td>Chain end</td>
+          <td style="text-align: center">当链结束时</td>
+          <td>on_chain_end</td>
+      </tr>
+      <tr>
+          <td>Chain error</td>
+          <td style="text-align: center">当链发生错误时</td>
+          <td>on_chain_error</td>
+      </tr>
+      <tr>
+          <td>Tool start</td>
+          <td style="text-align: center">当工具开始运行时</td>
+          <td>on_tool_start</td>
+      </tr>
+      <tr>
+          <td>Tool end</td>
+          <td style="text-align: center">当工具结束时</td>
+          <td>on_tool_end</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>使用回调的三种方式</strong>
+chain.invoke(input, config={&ldquo;callbacks&rdquo;: [callback_handler]})在运行 invoke 时传递对应的 config 信息配置 callbacks（推荐）
+chain = chain.with_config({&ldquo;callbacks&rdquo;: [callback_handler]})在 Chain 上调用 with_config 函数，传递对应的 config 并配置 callbacks（推荐）
+llm = OpenAI(callbacks=[callback_handler])在构建大语言模型时，传递 callbacks 参数
+<strong>LangChain 提供的两个基础 CallbackHandler：</strong>
+stdoutCallbackHandler：将日志输出到标准输出（控制台）
+FileCallbackHandler：将日志写入文件，便于调试和记录</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>parser <span style="color:#f92672">=</span> StrOutputParser()
+</span></span><span style="display:flex;"><span>query <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;我是谁&#34;</span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;query&#34;</span>: RunnablePassthrough()} <span style="color:#f92672">|</span> prompt <span style="color:#f92672">|</span> chat_llm <span style="color:#f92672">|</span> parser
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># res = chain.invoke(query, config={&#34;callbacks&#34;: [StdOutCallbackHandler()]})</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LLMOpsCallbackHandler</span>(BaseCallbackHandler):  <span style="color:#75715e">#自定义callbackhandler</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;自定义回调处理器&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    start_at: float <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_chat_model_start</span>(
+</span></span><span style="display:flex;"><span>            self,
+</span></span><span style="display:flex;"><span>            serialized: dict[str, Any],
+</span></span><span style="display:flex;"><span>            messages: list[list[BaseMessage]],
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>,
+</span></span><span style="display:flex;"><span>            run_id: UUID,
+</span></span><span style="display:flex;"><span>            parent_run_id: UUID <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>            tags: list[str] <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>            metadata: dict[str, Any] <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">**</span>kwargs: Any,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;聊天模型开始了...&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;serialized:&#34;</span>, serialized)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;messages:&#34;</span>, messages)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>start_at <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span>time()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_llm_end</span>(
+</span></span><span style="display:flex;"><span>            self,
+</span></span><span style="display:flex;"><span>            response: LLMResult,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>,
+</span></span><span style="display:flex;"><span>            run_id: UUID,
+</span></span><span style="display:flex;"><span>            parent_run_id: UUID <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">**</span>kwargs: Any,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>        end_at <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span>time()
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;模型生成：&#34;</span>, response)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;模型生成耗时：&#34;</span>, end_at <span style="color:#f92672">-</span> self<span style="color:#f92672">.</span>start_at)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_llm_new_token</span>(
+</span></span><span style="display:flex;"><span>            self,
+</span></span><span style="display:flex;"><span>            token: str,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>,
+</span></span><span style="display:flex;"><span>            chunk: GenerationChunk <span style="color:#f92672">|</span> ChatGenerationChunk <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>            run_id: UUID,
+</span></span><span style="display:flex;"><span>            parent_run_id: UUID <span style="color:#f92672">|</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">**</span>kwargs: Any,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;token生成了...&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;tiken:&#34;</span>, token)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke(query, config<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;callbacks&#34;</span>: [StdOutCallbackHandler(), LLMOpsCallbackHandler()]})
+</span></span><span style="display:flex;"><span>print(res)
+</span></span></code></pre></div><h2 id="26带异常信息回调并重新生成">2.6.带异常信息回调并重新生成</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Dict, Any
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.messages <span style="color:#f92672">import</span> AIMessage, ToolMessage, HumanMessage
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.prompts <span style="color:#f92672">import</span> ChatPromptTemplate
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.runnables <span style="color:#f92672">import</span> RunnableConfig
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> tool
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_openai <span style="color:#f92672">import</span> ChatOpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 自定义异常类：用于封装工具调用失败的信息</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CustomToolException</span>(<span style="color:#a6e22e">Exception</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, tool_call: <span style="color:#e6db74">&#34;ToolCall&#34;</span>, exception: <span style="color:#a6e22e">Exception</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span>__init__()
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>tool_call <span style="color:#f92672">=</span> tool_call
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>exception <span style="color:#f92672">=</span> exception
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@tool</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">complex_tool</span>(int_arg: int, float_arg: float, dict_arg: dict) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;使用复杂工具进行复杂计算操作&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> int_arg <span style="color:#f92672">*</span> float_arg
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tool_custom_exception</span>(msg: AIMessage, config: RunnableConfig) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    尝试执行工具，如果失败则抛出自定义异常。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> complex_tool<span style="color:#f92672">.</span>invoke(msg<span style="color:#f92672">.</span>tool_calls[<span style="color:#ae81ff">0</span>][<span style="color:#e6db74">&#34;args&#34;</span>], config<span style="color:#f92672">=</span>config)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> CustomToolException(tool_call<span style="color:#f92672">=</span>msg<span style="color:#f92672">.</span>tool_calls[<span style="color:#ae81ff">0</span>], exception<span style="color:#f92672">=</span>e)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1. 将异常转换为消息，供模型重新处理</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">exception_to_messages</span>(inputs: Dict[str, Any]) <span style="color:#f92672">-&gt;</span> Dict[str, Any]:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    将工具调用异常转换为消息，以便模型能看到错误并尝试纠正。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 从输入中提取异常信息</span>
+</span></span><span style="display:flex;"><span>    exception <span style="color:#f92672">=</span> inputs<span style="color:#f92672">.</span>pop(<span style="color:#e6db74">&#34;exception&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 构建错误消息列表</span>
+</span></span><span style="display:flex;"><span>    messages <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        AIMessage(content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>, tool_calls<span style="color:#f92672">=</span>[exception<span style="color:#f92672">.</span>tool_call]),
+</span></span><span style="display:flex;"><span>        ToolMessage(
+</span></span><span style="display:flex;"><span>            tool_call_id<span style="color:#f92672">=</span>exception<span style="color:#f92672">.</span>tool_call[<span style="color:#e6db74">&#34;id&#34;</span>],
+</span></span><span style="display:flex;"><span>            content<span style="color:#f92672">=</span>str(exception<span style="color:#f92672">.</span>exception)
+</span></span><span style="display:flex;"><span>        ),
+</span></span><span style="display:flex;"><span>        HumanMessage(content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;最后一次工具调用引发了异常，请尝试使用更正的参数再次调用该工具，不要重复犯错。&#34;</span>)
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    inputs[<span style="color:#e6db74">&#34;last_output&#34;</span>] <span style="color:#f92672">=</span> messages
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> inputs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. 创建提示模板（包含占位符）</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;placeholder&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{last_output}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. 创建大语言模型并绑定工具</span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOpenAI(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-4o&#34;</span>, temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)<span style="color:#f92672">.</span>bind_tools([complex_tool])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. 创建链并执行工具</span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> tool_custom_exception
+</span></span><span style="display:flex;"><span>self_correcting_chain <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>with_fallbacks(
+</span></span><span style="display:flex;"><span>    [exception_to_messages <span style="color:#f92672">|</span> chain],
+</span></span><span style="display:flex;"><span>    exception_key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;exception&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 5. 调用自我纠正链完成任务</span>
+</span></span><span style="display:flex;"><span>print(self_correcting_chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;使用复杂工具，对应参数为5和2.1&#34;</span>}))
+</span></span></code></pre></div>
+          </article>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg-3">
+        <div id="stickySideBar" class="sticky-sidebar">
+          
+          <aside class="toc">
+              <h5>
+                Table Of Contents
+              </h5>
+              <div class="toc-content">
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11串行runnablesequence">1.1.串行RunnableSequence</a></li>
+    <li><a href="#12并行runnableparallel">1.2.并行RunnableParallel</a></li>
+    <li><a href="#13runnablelambda把函数包装成-runnable">1.3.RunnableLambda把函数包装成 Runnable</a></li>
+    <li><a href="#14透传-runnablepassthrough">1.4.透传 RunnablePassthrough</a></li>
+    <li><a href="#15分支执行runnablebranch">1.5.分支执行RunnableBranch</a></li>
+    <li><a href="#16多轮对话-runnablewithmessagehistory">1.6.多轮对话 RunnableWithMessageHistory</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#21提前绑定参数bind">2.1.提前绑定参数bind</a></li>
+    <li><a href="#22invoke时通过with_config绑定参数configurable_fields">2.2.invoke时通过with_config绑定参数configurable_fields</a></li>
+    <li><a href="#23invoke时改变配置configurable_alternatives">2.3.invoke时改变配置configurable_alternatives</a></li>
+    <li><a href="#24绑定容错机制-重试with_retry和回退with_fallbacks">2.4.绑定容错机制-重试with_retry和回退with_fallbacks</a></li>
+    <li><a href="#25周期回调callbacks">2.5.周期回调callbacks</a></li>
+    <li><a href="#26带异常信息回调并重新生成">2.6.带异常信息回调并重新生成</a></li>
+  </ul>
+</nav>
+              </div>
+          </aside>
+          
+
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/code"
+                target="_blank"
+              >code</a></li>
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/langchain"
+                target="_blank"
+              >langchain</a></li>
+              
+            </ul>
+          </aside>
+          
+
+          
+          <aside class="social">
+            <h5>Social</h5>
+            <div class="social-content">
+              <ul class="list-inline">
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2f4.runnable%2f">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='https://twitter.com/share?text=4.Runnable&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f4.runnable%2f&hashtags=code%2clangchain'>
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=4.Runnable: http%3a%2f%2flocalhost%3a1313%2fblogs%2f4.runnable%2f">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='mailto:?subject=4.Runnable&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f4.runnable%2f'>
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-9 p-4">
+        
+      </div>
+    </div>
+  </div>
+  <button class="p-2 px-3" onclick="topFunction()" id="topScroll">
+    <i class="fas fa-angle-up"></i>
+  </button>
+</section>
+
+
+<div class="progress">
+  <div id="scroll-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<Script src="/js/scrollProgressBar.js"></script>
+
+
+<script>
+  var topScroll = document.getElementById("topScroll");
+  window.onscroll = function() {scrollFunction()};
+
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      topScroll.style.display = "block";
+    } else {
+      topScroll.style.display = "none";
+    }
+  }
+
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+
+  
+  let stickySideBarElem = document.getElementById("stickySideBar");
+  let stickyNavBar =  true ;
+  if(stickyNavBar) {
+    let headerElem = document.getElementById("profileHeader");
+    let headerHeight = headerElem.offsetHeight + 15;
+    stickySideBarElem.style.top = headerHeight + "px";
+  } else {
+    stickySideBarElem.style.top = "50px";
+  }
+</script>
+
+
+<script src="/js/readingTime.js"></script>
+
+
+
+  </div><footer>
+    
+ 
+ 
+<div class="container py-3" id="recent-posts">
+    
+    
+    <div class="h3 text-center text-secondary py-3">
+        Recent Posts
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+                        <img src="/images/blogs/claudecode.jpeg" class="card-img-top" alt="不翻墙使用Claude-code">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="不翻墙使用Claude-code">不翻墙使用Claude-code</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
+<h1 id="1安装claude_code">1.安装claude_code</h1>
+<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
+</span></span><span style="display:flex;"><span>claude -v
+</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
+<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
+</span></span><span style="display:flex;"><span>vi …</span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Feb 21, 2026</span>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/1.prompt/">
+                        <img src="/images/blogs/01prompt.png" class="card-img-top" alt="1.Prompt">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/1.prompt/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="1.Prompt">1.Prompt</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">. …</span></span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/10.tools/">
+                        <img src="/images/blogs/10tools.png" class="card-img-top" alt="10.Tools">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/10.tools/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="10.Tools">10.Tools</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h1></h1>
+<p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具 …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/10.tools/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="text-center pt-2">
+    
+
+    
+
+    
+
+    
+
+    
+</div><div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            
+                <div class="pb-2">
+                    <a href="http://localhost:1313/" title="Profile">
+                        <img alt="Footer logo" src="/fav.png"
+                            height="40px" width="40px">
+                    </a>
+                </div>
+            
+            &copy; 2026  All rights reserved
+            <div class="text-secondary">
+                Made with
+                <span class="text-danger">
+                    &#10084;
+                </span>
+                and
+                <a href="https://github.com/gurusabarish/hugo-profile" target="_blank"
+                    title="Designed and developed by gurusabarish">
+                    Hugo Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</footer><script src="/bootstrap-5/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    }
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+</script>
+
+
+    <script src="/js/search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+  <section id="search-content" class="py-2">
+    <div class="container" id="search-results"></div>
+  </section>
+</body>
+
+</html>

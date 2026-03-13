@@ -385,37 +385,14 @@ Link | Profile
             <div class="card h-100">
                 
                 <div class="card-header">
-                    <a href="/blogs/hoge_github/">
-                        <img src="/images/blogs/blog.jpeg" class="card-img-top" alt="Hugo和GitHub搭建博客">
+                    <a href="/blogs/1.prompt/">
+                        <img src="/images/blogs/01prompt.png" class="card-img-top" alt="1.Prompt">
                     </a>
                 </div>
-                
-                <div class="card-body bg-transparent p-3 shadow-sm">
-                    <a href="/blogs/hoge_github/" class="primary-font card-title">
-                        <h5 class="card-title bg-transparent" title="Hugo和GitHub搭建博客">Hugo和GitHub搭建博客</h5>
-                    </a>
-                    <div class="card-text secondary-font">
-                        <p><p>本文主要是使用hugo和github进行个人博客网站的搭建，21年刚上班的时候搭过一版，没怎么用，希望这次能坚持在这里记录自己的博客。</p>
-<h1 id="1本地hugo安装">1.本地hugo安装</h1>
-<p>因为有版本兼容问题，所以先去选择主题，然后看看主题对应推荐的hugo版本，然后下载对应版本的hugo。
-<a href="https://themes.gohugo.io/">hugo主题社区</a>里面选择，我选择了<a href="https://hugo-profile.netlify.app/">hugo-profile</a>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>brew install hugo@0.145.0           <span style="color:#75715e">#下载安装，如果失败，就下载这个版本的tar.gz文件，解压，然后sudo mv hugo /usr/local/bin/hugo把解压后的hugo放置到path目录下</span>
-</span></span><span style="display:flex;"><span>sudo xattr -rd …</span></span></span></span></code></pre></div></p>
-                    </div>
-                </div>
-                <div class="mt-auto card-footer">
-                    <span class="float-start">Dec 17, 2025</span>
-                    <a href="/blogs/hoge_github/" class="float-end btn btn-outline-info btn-sm">Read</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-4 col-md-6 pt-2">
-            <div class="card h-100">
                 
                 <div class="card-body bg-transparent p-3 shadow-sm">
                     <a href="/blogs/1.prompt/" class="primary-font card-title">
-                        <h5 class="card-title bg-transparent" title=""></h5>
+                        <h5 class="card-title bg-transparent" title="1.Prompt">1.Prompt</h5>
                     </a>
                     <div class="card-text secondary-font">
                         <p><p>安装：<code>pip install langchain langchain-community</code></p>
@@ -429,8 +406,38 @@ Link | Profile
                     </div>
                 </div>
                 <div class="mt-auto card-footer">
-                    <span class="float-start">Jan 1, 0001</span>
+                    <span class="float-start">Dec 17, 2025</span>
                     <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/10.tools/">
+                        <img src="/images/blogs/10tools.png" class="card-img-top" alt="10.Tools">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/10.tools/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="10.Tools">10.Tools</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h1></h1>
+<p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具 …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/10.tools/" class="float-end btn btn-outline-info btn-sm">Read</a>
                 </div>
             </div>
         </div>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+<link rel="icon" href=/fav.png type="image/gif">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      media="print" onload="this.media='all'" />
+<noscript>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
+</noscript>
+
+
+<link rel="stylesheet" href="/css/font.css" media="all">
+
+
+
+<meta property="og:url" content="http://localhost:1313/blogs/3.outputparser/">
+  <meta property="og:site_name" content="Profile">
+  <meta property="og:title" content="3.OutputParser">
+  <meta property="og:description" content="参考：https://docs.langchain.com/oss/python/langchain/structured-output
+OutputParser的使用其实也就三步：
+1.定义parser；2.parser.get_format_instructions()插入到prompt；3.输出parser.invoke()
+1.DatetimeOutputParser # 1.创建Parser output_parser = DatetimeOutputParser() # 2.创建提示模板 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, f&#34;你必须按照以下格式返回日期时间：{output_parser.get_format_instructions()}&#34;), (&#34;human&#34;, &#34;请将以下自然语言转换为标准日期时间格式：\n###{text}###&#34;) ]) # 3.parser有两个方法解析：invoke和parse，invoke底层还是parse resp = output_parser.invoke(chat_model.invoke(prompt.invoke({&#34;text&#34;: &#34;今天2026年1月22日&#34;})))#invoke(string,message) resp = output_parser.parse(chat_model.invoke(prompt.invoke({&#34;text&#34;: &#34;今天2026年1月22日&#34;})).content)#parse(string) 2.EnumOutputParser # 0.定义枚举类 class Status(Enum): SUCCESS = &#34;success&#34; FAILED = &#34;failed&#34; PENDING = &#34;pending&#34; # 1.创建解析器 output_parser = EnumOutputParser(enum=Status) # 2.提示模板 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, f&#34;判断用户现在的状态：{output_parser.get_format_instructions()}&#34;), (&#34;human&#34;, &#34;{input}&#34;) ]) # 3.测试输入 result = chain.invoke({&#34;input&#34;: &#34;我现在正在失业中&#34;})#&lt;enum &#39;Status&#39;&gt; 3.StrOutputParser # 1.创建解析器 output_parser = StrOutputParser() # 2.提示模板，不用get_format_instructions() prompt = ChatPromptTemplate.from_template(&#34;{query}&#34;) # 3.输出invoke chain1 = prompt | chat_model chain2 = prompt | chat_model | output_parser print(chain1.invoke({&#34;query&#34;: &#34;你是谁&#34;})) print(chain2.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 4.JsonOutputParser # 0. 创建一个json数据结构，用于告诉大语言模型这个json长什么样子 class Joke(BaseModel): joke: str = Field(description=&#34;回答用户的冷笑话&#34;) punchline: str = Field(description=&#34;这个冷笑话的笑点&#34;) # 1.创建解析器 output_parser = JsonOutputParser(pydantic_object=Joke) # 2.创建提示模板 prompt = ChatPromptTemplate.from_template(&#34;根据用户问题回答。\n{format_instructions}\n{query}&#34;).partial( format_instructions=output_parser.get_format_instructions()) # 3.输出invoke now_prompt = prompt.invoke({&#34;query&#34;: &#34;给我讲个笑话&#34;}) 5.PydanticOutputParser # 0. 定义 Pydantic 模型 class User(BaseModel): name: str age: int # 1.创建解析器 output_parser = PydanticOutputParser(pydantic_object=User) prompt = ChatPromptTemplate.from_template( &#34;&#34;&#34; 请从用户描述中提取信息，并严格按格式输出： {format_instructions} 用户描述： {query} &#34;&#34;&#34; ) # 2.创建提示模板&amp;3.输出invoke now_prompt = prompt.invoke({ &#34;query&#34;: &#34;小明今年23岁&#34;, &#34;format_instructions&#34;: output_parser.get_format_instructions() }) 6.通过with_structured_output绑定输出结构给模型 # 0.定义结构化输出模型：QAExtra class QAExtra(BaseModel): &#34;&#34;&#34;一个问答键值对工具，传递对应的假设性问题&#43;答案&#34;&#34;&#34; question: str = Field(description=&#34;假设性问题&#34;) answer: str = Field(description=&#34;假设性问题对应的答案&#34;) # 1.通过with_structured_output绑定输出结构给模型 structured_llm = llm.with_structured_output( QAExtra) # 强制输出为 QAExtra 格式,默认method == &#34;json_schema&#34;，内部使用PydanticOutputParser进行了转换 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;请从用户传递的 query 中提取出假设性的问题&#43;答案。&#34;), (&#34;human&#34;, &#34;{query}&#34;) ]) chain = {&#34;query&#34;: RunnablePassthrough()} | prompt | structured_llm # 2.invoke调用带outputparser的模型 print(chain.invoke(&#34;我叫小z，我喜欢打篮球，游泳&#34;))">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blogs">
+    <meta property="article:published_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:modified_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:tag" content="Code">
+    <meta property="article:tag" content="Langchain">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="3.OutputParser">
+  <meta name="twitter:description" content="参考：https://docs.langchain.com/oss/python/langchain/structured-output
+OutputParser的使用其实也就三步：
+1.定义parser；2.parser.get_format_instructions()插入到prompt；3.输出parser.invoke()
+1.DatetimeOutputParser # 1.创建Parser output_parser = DatetimeOutputParser() # 2.创建提示模板 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, f&#34;你必须按照以下格式返回日期时间：{output_parser.get_format_instructions()}&#34;), (&#34;human&#34;, &#34;请将以下自然语言转换为标准日期时间格式：\n###{text}###&#34;) ]) # 3.parser有两个方法解析：invoke和parse，invoke底层还是parse resp = output_parser.invoke(chat_model.invoke(prompt.invoke({&#34;text&#34;: &#34;今天2026年1月22日&#34;})))#invoke(string,message) resp = output_parser.parse(chat_model.invoke(prompt.invoke({&#34;text&#34;: &#34;今天2026年1月22日&#34;})).content)#parse(string) 2.EnumOutputParser # 0.定义枚举类 class Status(Enum): SUCCESS = &#34;success&#34; FAILED = &#34;failed&#34; PENDING = &#34;pending&#34; # 1.创建解析器 output_parser = EnumOutputParser(enum=Status) # 2.提示模板 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, f&#34;判断用户现在的状态：{output_parser.get_format_instructions()}&#34;), (&#34;human&#34;, &#34;{input}&#34;) ]) # 3.测试输入 result = chain.invoke({&#34;input&#34;: &#34;我现在正在失业中&#34;})#&lt;enum &#39;Status&#39;&gt; 3.StrOutputParser # 1.创建解析器 output_parser = StrOutputParser() # 2.提示模板，不用get_format_instructions() prompt = ChatPromptTemplate.from_template(&#34;{query}&#34;) # 3.输出invoke chain1 = prompt | chat_model chain2 = prompt | chat_model | output_parser print(chain1.invoke({&#34;query&#34;: &#34;你是谁&#34;})) print(chain2.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 4.JsonOutputParser # 0. 创建一个json数据结构，用于告诉大语言模型这个json长什么样子 class Joke(BaseModel): joke: str = Field(description=&#34;回答用户的冷笑话&#34;) punchline: str = Field(description=&#34;这个冷笑话的笑点&#34;) # 1.创建解析器 output_parser = JsonOutputParser(pydantic_object=Joke) # 2.创建提示模板 prompt = ChatPromptTemplate.from_template(&#34;根据用户问题回答。\n{format_instructions}\n{query}&#34;).partial( format_instructions=output_parser.get_format_instructions()) # 3.输出invoke now_prompt = prompt.invoke({&#34;query&#34;: &#34;给我讲个笑话&#34;}) 5.PydanticOutputParser # 0. 定义 Pydantic 模型 class User(BaseModel): name: str age: int # 1.创建解析器 output_parser = PydanticOutputParser(pydantic_object=User) prompt = ChatPromptTemplate.from_template( &#34;&#34;&#34; 请从用户描述中提取信息，并严格按格式输出： {format_instructions} 用户描述： {query} &#34;&#34;&#34; ) # 2.创建提示模板&amp;3.输出invoke now_prompt = prompt.invoke({ &#34;query&#34;: &#34;小明今年23岁&#34;, &#34;format_instructions&#34;: output_parser.get_format_instructions() }) 6.通过with_structured_output绑定输出结构给模型 # 0.定义结构化输出模型：QAExtra class QAExtra(BaseModel): &#34;&#34;&#34;一个问答键值对工具，传递对应的假设性问题&#43;答案&#34;&#34;&#34; question: str = Field(description=&#34;假设性问题&#34;) answer: str = Field(description=&#34;假设性问题对应的答案&#34;) # 1.通过with_structured_output绑定输出结构给模型 structured_llm = llm.with_structured_output( QAExtra) # 强制输出为 QAExtra 格式,默认method == &#34;json_schema&#34;，内部使用PydanticOutputParser进行了转换 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;请从用户传递的 query 中提取出假设性的问题&#43;答案。&#34;), (&#34;human&#34;, &#34;{query}&#34;) ]) chain = {&#34;query&#34;: RunnablePassthrough()} | prompt | structured_llm # 2.invoke调用带outputparser的模型 print(chain.invoke(&#34;我叫小z，我喜欢打篮球，游泳&#34;))">
+
+
+<link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
+<link rel="stylesheet" href="/css/footer.css" media="all">
+
+
+<link rel="stylesheet" href="/css/theme.css" media="all">
+
+<style>
+    :root {
+        --text-color: #343a40;
+        --text-secondary-color: #6c757d;
+        --text-link-color: #007bff;
+        --background-color: #eaedf0;
+        --secondary-background-color: #64ffda1a;
+        --primary-color: #007bff;
+        --secondary-color: #f8f9fa;
+
+         
+        --text-color-dark: #e4e6eb;
+        --text-secondary-color-dark: #b0b3b8;
+        --text-link-color-dark: #ffffff;
+        --background-color-dark: #18191a;
+        --secondary-background-color-dark: #212529;
+        --primary-color-dark: #ffffff;
+        --secondary-color-dark: #212529;
+    }
+    body {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    html {
+        background-color: var(--background-color) !important;
+    }
+
+    body::-webkit-scrollbar {
+        height: 0px;
+        width: 8px;
+        background-color: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 1rem;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 1rem;
+        background: #b0b0b0;
+        outline: 1px solid var(--background-color);
+    }
+
+    #search-content::-webkit-scrollbar {
+        width: .5em;
+        height: .1em;
+        background-color: var(--background-color);
+    }
+</style>
+
+
+
+<meta name="description" content="">
+<link rel="stylesheet" href="/css/single.css">
+
+
+<script defer src="/fontawesome-6/all-6.4.2.js"></script>
+
+
+  
+  
+
+  <title>
+3.OutputParser | Profile
+
+  </title>
+</head>
+
+<body class="light">
+  
+  
+<script>
+    let localStorageValue = localStorage.getItem("pref-theme");
+    let mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    switch (localStorageValue) {
+        case "dark":
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            break;
+        case "light":
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            break;
+        default:
+            if (mediaQuery) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            }
+            break;
+    }
+</script>
+
+
+
+
+<script>
+    var prevScrollPos = window.pageYOffset;
+    window.addEventListener("scroll", function showHeaderOnScroll() {
+        let profileHeaderElem = document.getElementById("profileHeader");
+        let currentScrollPos = window.pageYOffset;
+        let resetHeaderStyle = false;
+        let showNavBarOnScrollUp =  true ;
+        let showNavBar = showNavBarOnScrollUp ? prevScrollPos > currentScrollPos : currentScrollPos > 0;
+        if (showNavBar) {
+            profileHeaderElem.classList.add("showHeaderOnTop");
+        } else {
+            resetHeaderStyle = true;
+        }
+        if(currentScrollPos === 0) {
+            resetHeaderStyle = true;
+        }
+        if(resetHeaderStyle) {
+            profileHeaderElem.classList.remove("showHeaderOnTop");
+        }
+        prevScrollPos = currentScrollPos;
+    });
+</script>
+
+
+
+<header id="profileHeader">
+    <nav class="pt-3 navbar navbar-expand-lg animate">
+        <div class="container-fluid mx-xs-2 mx-sm-5 mx-md-5 mx-lg-5">
+            
+            <a class="navbar-brand primary-font text-wrap" href="/">
+                
+                <img src="/fav.png" width="30" height="30"
+                    class="d-inline-block align-top">
+                Profile
+                
+            </a>
+
+            
+                <div>
+                    <input id="search" autocomplete="off" class="form-control mr-sm-2 d-none d-md-block" placeholder='Ctrl &#43; k to Search...'
+                        aria-label="Search" oninput="searchOnChange(event)">
+                </div>
+            
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true">
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </button>
+
+            
+            <div class="collapse navbar-collapse text-wrap primary-font" id="navbarContent">
+                <ul class="navbar-nav ms-auto text-center">
+                    
+                        <li class="nav-item navbar-text d-block d-md-none">
+                            <div class="nav-link">
+                                <input id="search" autocomplete="off" class="form-control mr-sm-2" placeholder='Ctrl &#43; k to Search...' aria-label="Search" oninput="searchOnChange(event)">
+                            </div>
+                        </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#about" aria-label="about">
+                            About Me
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#experience"
+                            aria-label="experience">
+                            Experience
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#education"
+                            aria-label="education">
+                            Education
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#contact"
+                            aria-label="contact">
+                            Contact
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/blogs" title="Blog posts">
+                            
+                            Blog
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/gallery" title="Blog posts">
+                            
+                            Gallery
+                        </a>
+                    </li>
+                    
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        
+                        <div class="text-center">
+                            <button id="theme-toggle">
+                                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                    
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+<div id="content">
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">3.OutputParser</h1>
+            <div class="text-center">
+              
+                Zoe
+                <small>|</small>
+              
+              Dec 17, 2025
+
+              
+              <span id="readingTime">
+                min read
+              </span>
+              
+            </div>
+          </div>
+          
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="/images/blogs/03OutputParser.png" alt="3.OutputParser">
+          </div>
+          
+          <article class="page-content  p-2">
+          <p>参考：https://docs.langchain.com/oss/python/langchain/structured-output</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/03outputparser.png" alt="03outputparser"></p>
+<p>OutputParser的使用其实也就三步：</p>
+<p>1.定义parser；2.parser.get_format_instructions()插入到prompt；3.输出parser.invoke()</p>
+<h1 id="1datetimeoutputparser">1.DatetimeOutputParser</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.创建Parser</span>
+</span></span><span style="display:flex;"><span>output_parser <span style="color:#f92672">=</span> DatetimeOutputParser()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.创建提示模板</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;你必须按照以下格式返回日期时间：</span><span style="color:#e6db74">{</span>output_parser<span style="color:#f92672">.</span>get_format_instructions()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;请将以下自然语言转换为标准日期时间格式：</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">###</span><span style="color:#e6db74">{text}</span><span style="color:#e6db74">###&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.parser有两个方法解析：invoke和parse，invoke底层还是parse</span>
+</span></span><span style="display:flex;"><span>resp <span style="color:#f92672">=</span> output_parser<span style="color:#f92672">.</span>invoke(chat_model<span style="color:#f92672">.</span>invoke(prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;text&#34;</span>: <span style="color:#e6db74">&#34;今天2026年1月22日&#34;</span>})))<span style="color:#75715e">#invoke(string,message)</span>
+</span></span><span style="display:flex;"><span>resp <span style="color:#f92672">=</span> output_parser<span style="color:#f92672">.</span>parse(chat_model<span style="color:#f92672">.</span>invoke(prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;text&#34;</span>: <span style="color:#e6db74">&#34;今天2026年1月22日&#34;</span>}))<span style="color:#f92672">.</span>content)<span style="color:#75715e">#parse(string)</span>
+</span></span></code></pre></div><h1 id="2enumoutputparser">2.EnumOutputParser</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 0.定义枚举类</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Status</span>(Enum):
+</span></span><span style="display:flex;"><span>    SUCCESS <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;success&#34;</span>
+</span></span><span style="display:flex;"><span>    FAILED <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;failed&#34;</span>
+</span></span><span style="display:flex;"><span>    PENDING <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;pending&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.创建解析器</span>
+</span></span><span style="display:flex;"><span>output_parser <span style="color:#f92672">=</span> EnumOutputParser(enum<span style="color:#f92672">=</span>Status)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.提示模板</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;判断用户现在的状态：</span><span style="color:#e6db74">{</span>output_parser<span style="color:#f92672">.</span>get_format_instructions()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{input}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.测试输入</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;我现在正在失业中&#34;</span>})<span style="color:#75715e">#&lt;enum &#39;Status&#39;&gt;</span>
+</span></span></code></pre></div><h1 id="3stroutputparser">3.StrOutputParser</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 1.创建解析器</span>
+</span></span><span style="display:flex;"><span>output_parser <span style="color:#f92672">=</span> StrOutputParser() 
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.提示模板，不用get_format_instructions()</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.输出invoke</span>
+</span></span><span style="display:flex;"><span>chain1 <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> chat_model
+</span></span><span style="display:flex;"><span>chain2 <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> chat_model <span style="color:#f92672">|</span> output_parser
+</span></span><span style="display:flex;"><span>print(chain1<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span><span style="display:flex;"><span>print(chain2<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span></code></pre></div><h1 id="4jsonoutputparser">4.JsonOutputParser</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 0. 创建一个json数据结构，用于告诉大语言模型这个json长什么样子</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Joke</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    joke: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;回答用户的冷笑话&#34;</span>)
+</span></span><span style="display:flex;"><span>    punchline: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;这个冷笑话的笑点&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.创建解析器</span>
+</span></span><span style="display:flex;"><span>output_parser <span style="color:#f92672">=</span> JsonOutputParser(pydantic_object<span style="color:#f92672">=</span>Joke)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.创建提示模板</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;根据用户问题回答。</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{format_instructions}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)<span style="color:#f92672">.</span>partial(
+</span></span><span style="display:flex;"><span>    format_instructions<span style="color:#f92672">=</span>output_parser<span style="color:#f92672">.</span>get_format_instructions())
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.输出invoke</span>
+</span></span><span style="display:flex;"><span>now_prompt <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;给我讲个笑话&#34;</span>})
+</span></span></code></pre></div><h1 id="5pydanticoutputparser">5.PydanticOutputParser</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 0. 定义 Pydantic 模型</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">User</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    name: str
+</span></span><span style="display:flex;"><span>    age: int
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.创建解析器</span>
+</span></span><span style="display:flex;"><span>output_parser <span style="color:#f92672">=</span> PydanticOutputParser(pydantic_object<span style="color:#f92672">=</span>User)
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    请从用户描述中提取信息，并严格按格式输出：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    </span><span style="color:#e6db74">{format_instructions}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    用户描述：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    </span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.创建提示模板&amp;3.输出invoke</span>
+</span></span><span style="display:flex;"><span>now_prompt <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>invoke({
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;小明今年23岁&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;format_instructions&#34;</span>: output_parser<span style="color:#f92672">.</span>get_format_instructions()
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><h1 id="6通过with_structured_output绑定输出结构给模型">6.通过with_structured_output绑定输出结构给模型</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 0.定义结构化输出模型：QAExtra</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">QAExtra</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;一个问答键值对工具，传递对应的假设性问题+答案&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    question: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;假设性问题&#34;</span>)
+</span></span><span style="display:flex;"><span>    answer: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;假设性问题对应的答案&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.通过with_structured_output绑定输出结构给模型</span>
+</span></span><span style="display:flex;"><span>structured_llm <span style="color:#f92672">=</span> llm<span style="color:#f92672">.</span>with_structured_output(
+</span></span><span style="display:flex;"><span>    QAExtra)  <span style="color:#75715e"># 强制输出为 QAExtra 格式,默认method == &#34;json_schema&#34;，内部使用PydanticOutputParser进行了转换</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;请从用户传递的 query 中提取出假设性的问题+答案。&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;query&#34;</span>: RunnablePassthrough()} <span style="color:#f92672">|</span> prompt <span style="color:#f92672">|</span> structured_llm
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.invoke调用带outputparser的模型</span>
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>invoke(<span style="color:#e6db74">&#34;我叫小z，我喜欢打篮球，游泳&#34;</span>))
+</span></span></code></pre></div>
+          </article>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg-3">
+        <div id="stickySideBar" class="sticky-sidebar">
+          
+          <aside class="toc">
+              <h5>
+                Table Of Contents
+              </h5>
+              <div class="toc-content">
+                <nav id="TableOfContents"></nav>
+              </div>
+          </aside>
+          
+
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/code"
+                target="_blank"
+              >code</a></li>
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/langchain"
+                target="_blank"
+              >langchain</a></li>
+              
+            </ul>
+          </aside>
+          
+
+          
+          <aside class="social">
+            <h5>Social</h5>
+            <div class="social-content">
+              <ul class="list-inline">
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2f3.outputparser%2f">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='https://twitter.com/share?text=3.OutputParser&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f3.outputparser%2f&hashtags=code%2clangchain'>
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=3.OutputParser: http%3a%2f%2flocalhost%3a1313%2fblogs%2f3.outputparser%2f">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='mailto:?subject=3.OutputParser&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f3.outputparser%2f'>
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-9 p-4">
+        
+      </div>
+    </div>
+  </div>
+  <button class="p-2 px-3" onclick="topFunction()" id="topScroll">
+    <i class="fas fa-angle-up"></i>
+  </button>
+</section>
+
+
+<div class="progress">
+  <div id="scroll-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<Script src="/js/scrollProgressBar.js"></script>
+
+
+<script>
+  var topScroll = document.getElementById("topScroll");
+  window.onscroll = function() {scrollFunction()};
+
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      topScroll.style.display = "block";
+    } else {
+      topScroll.style.display = "none";
+    }
+  }
+
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+
+  
+  let stickySideBarElem = document.getElementById("stickySideBar");
+  let stickyNavBar =  true ;
+  if(stickyNavBar) {
+    let headerElem = document.getElementById("profileHeader");
+    let headerHeight = headerElem.offsetHeight + 15;
+    stickySideBarElem.style.top = headerHeight + "px";
+  } else {
+    stickySideBarElem.style.top = "50px";
+  }
+</script>
+
+
+<script src="/js/readingTime.js"></script>
+
+
+
+  </div><footer>
+    
+ 
+ 
+<div class="container py-3" id="recent-posts">
+    
+    
+    <div class="h3 text-center text-secondary py-3">
+        Recent Posts
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+                        <img src="/images/blogs/claudecode.jpeg" class="card-img-top" alt="不翻墙使用Claude-code">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="不翻墙使用Claude-code">不翻墙使用Claude-code</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
+<h1 id="1安装claude_code">1.安装claude_code</h1>
+<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
+</span></span><span style="display:flex;"><span>claude -v
+</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
+<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
+</span></span><span style="display:flex;"><span>vi …</span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Feb 21, 2026</span>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/1.prompt/">
+                        <img src="/images/blogs/01prompt.png" class="card-img-top" alt="1.Prompt">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/1.prompt/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="1.Prompt">1.Prompt</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">. …</span></span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/10.tools/">
+                        <img src="/images/blogs/10tools.png" class="card-img-top" alt="10.Tools">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/10.tools/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="10.Tools">10.Tools</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h1></h1>
+<p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具 …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/10.tools/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="text-center pt-2">
+    
+
+    
+
+    
+
+    
+
+    
+</div><div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            
+                <div class="pb-2">
+                    <a href="http://localhost:1313/" title="Profile">
+                        <img alt="Footer logo" src="/fav.png"
+                            height="40px" width="40px">
+                    </a>
+                </div>
+            
+            &copy; 2026  All rights reserved
+            <div class="text-secondary">
+                Made with
+                <span class="text-danger">
+                    &#10084;
+                </span>
+                and
+                <a href="https://github.com/gurusabarish/hugo-profile" target="_blank"
+                    title="Designed and developed by gurusabarish">
+                    Hugo Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</footer><script src="/bootstrap-5/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    }
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+</script>
+
+
+    <script src="/js/search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+  <section id="search-content" class="py-2">
+    <div class="container" id="search-results"></div>
+  </section>
+</body>
+
+</html>

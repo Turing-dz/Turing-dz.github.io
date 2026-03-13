@@ -28,21 +28,22 @@
 
 
 
-<meta property="og:url" content="http://localhost:1313/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+<meta property="og:url" content="http://localhost:1313/blogs/5.chainsmith/">
   <meta property="og:site_name" content="Profile">
-  <meta property="og:title" content="不翻墙使用Claude-code">
-  <meta property="og:description" content="不翻墙使用Claude-code">
+  <meta property="og:title" content="5.Chain">
+  <meta property="og:description" content="1.Chain 1.1.大模型链LLMChain prompt = ChatPromptTemplate.from_template(&#34;{query}&#34;) chain = LLMChain(prompt=prompt, llm=chat_llm) # chain类的5种运行方式 print(chain(&#34;你是谁&#34;)) print(chain.run(&#34;你是谁&#34;)) print(chain.apply([{&#34;query&#34;: &#34;你是谁&#34;}])) print(chain.generate([{&#34;query&#34;: &#34;你是谁&#34;}])) print(chain.predict(query=&#34;你是谁&#34;)) # runnable的invoke运行方法 print(chain.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 1.2.对话链ConversationChain chain = ConversationChain(llm=chat_llm) # 自带记忆组件 # 第一轮对话 content = chain.invoke({&#34;input&#34;: &#34;你好，我是小z，我喜欢打球&#43;游泳，你喜欢什么呢？&#34;}) print(content) # 第二轮对话（基于上下文） content = chain.invoke({&#34;input&#34;: &#34;请统计一下我的爱好有什么&#34;}) print(content) 1.3.文档对话链create_stuff_documents_chain # 1. 创建提示模板 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;你是一个强大的聊天机器人，能根据用户提供的上下文来回复用户的问题。\n\n&lt;context&gt;{context}&lt;/context&gt;&#34;), (&#34;human&#34;, &#34;{query}&#34;) ]) # 2. 创建链应用 chain = create_stuff_documents_chain(prompt=prompt, llm=chat_llm) # 3. 文档列表 documents = [ Document(page_content=&#34;小明喜欢绿色，但不喜欢黄色&#34;), Document(page_content=&#34;小王喜欢粉色，也有一点喜欢红色&#34;), Document(page_content=&#34;小泽喜欢蓝色，但更喜欢青色&#34;) ] # 4. 调用链 out = chain.invoke({ &#34;query&#34;: &#34;请帮我统计一下大家都喜欢什么颜色&#34;, &#34;context&#34;: documents }) print(out) 2.Runnables 可视化 # pip install grandalf print(chain.get_graph().print_ascii()) 3.LangchianSmith 在tracing里面新建一个project，然后按照提示在env里面设置即可.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="blogs">
-    <meta property="article:published_time" content="2026-02-21T12:31:27+08:00">
-    <meta property="article:modified_time" content="2026-02-21T12:31:27+08:00">
-    <meta property="article:tag" content="Life">
+    <meta property="article:published_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:modified_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:tag" content="Code">
+    <meta property="article:tag" content="Langchain">
 
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="不翻墙使用Claude-code">
-  <meta name="twitter:description" content="不翻墙使用Claude-code">
+  <meta name="twitter:title" content="5.Chain">
+  <meta name="twitter:description" content="1.Chain 1.1.大模型链LLMChain prompt = ChatPromptTemplate.from_template(&#34;{query}&#34;) chain = LLMChain(prompt=prompt, llm=chat_llm) # chain类的5种运行方式 print(chain(&#34;你是谁&#34;)) print(chain.run(&#34;你是谁&#34;)) print(chain.apply([{&#34;query&#34;: &#34;你是谁&#34;}])) print(chain.generate([{&#34;query&#34;: &#34;你是谁&#34;}])) print(chain.predict(query=&#34;你是谁&#34;)) # runnable的invoke运行方法 print(chain.invoke({&#34;query&#34;: &#34;你是谁&#34;})) 1.2.对话链ConversationChain chain = ConversationChain(llm=chat_llm) # 自带记忆组件 # 第一轮对话 content = chain.invoke({&#34;input&#34;: &#34;你好，我是小z，我喜欢打球&#43;游泳，你喜欢什么呢？&#34;}) print(content) # 第二轮对话（基于上下文） content = chain.invoke({&#34;input&#34;: &#34;请统计一下我的爱好有什么&#34;}) print(content) 1.3.文档对话链create_stuff_documents_chain # 1. 创建提示模板 prompt = ChatPromptTemplate.from_messages([ (&#34;system&#34;, &#34;你是一个强大的聊天机器人，能根据用户提供的上下文来回复用户的问题。\n\n&lt;context&gt;{context}&lt;/context&gt;&#34;), (&#34;human&#34;, &#34;{query}&#34;) ]) # 2. 创建链应用 chain = create_stuff_documents_chain(prompt=prompt, llm=chat_llm) # 3. 文档列表 documents = [ Document(page_content=&#34;小明喜欢绿色，但不喜欢黄色&#34;), Document(page_content=&#34;小王喜欢粉色，也有一点喜欢红色&#34;), Document(page_content=&#34;小泽喜欢蓝色，但更喜欢青色&#34;) ] # 4. 调用链 out = chain.invoke({ &#34;query&#34;: &#34;请帮我统计一下大家都喜欢什么颜色&#34;, &#34;context&#34;: documents }) print(out) 2.Runnables 可视化 # pip install grandalf print(chain.get_graph().print_ascii()) 3.LangchianSmith 在tracing里面新建一个project，然后按照提示在env里面设置即可.">
 
 
 <link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
@@ -106,7 +107,7 @@
 
 
 
-<meta name="description" content="不翻墙使用Claude-code">
+<meta name="description" content="">
 <link rel="stylesheet" href="/css/single.css">
 
 
@@ -117,7 +118,7 @@
   
 
   <title>
-不翻墙使用Claude-code | Profile
+5.Chain | Profile
 
   </title>
 </head>
@@ -314,13 +315,13 @@
       <div class="col-sm-12 col-md-12 col-lg-9">
         <div class="pr-lg-4">
           <div class="title mb-5">
-            <h1 class="text-center mb-4">不翻墙使用Claude-code</h1>
+            <h1 class="text-center mb-4">5.Chain</h1>
             <div class="text-center">
               
                 Zoe
                 <small>|</small>
               
-              Feb 21, 2026
+              Dec 17, 2025
 
               
               <span id="readingTime">
@@ -331,32 +332,61 @@
           </div>
           
           <div class="featured-image">
-            <img class="img-fluid mx-auto d-block" src="/images/blogs/claudecode.jpeg" alt="不翻墙使用Claude-code">
+            <img class="img-fluid mx-auto d-block" src="/images/blogs/05chain.png" alt="5.Chain">
           </div>
           
           <article class="page-content  p-2">
-          <p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
-<h1 id="1安装claude_code">1.安装claude_code</h1>
-<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
-</span></span><span style="display:flex;"><span>claude -v
-</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
-<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
-</span></span><span style="display:flex;"><span>vi  ~/.claude/settings.json
-</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;env&#34;</span>: <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ANTHROPIC_API_KEY&#34;</span>: <span style="color:#e6db74">&#34;sk-xxxxxxxxxxxxxxxx&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ANTHROPIC_BASE_URL&#34;</span>: <span style="color:#e6db74">&#34;https://api.openai-proxy.org/anthropic&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
-</span></span></code></pre></div><p>2.进行免登录配置。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>vi ~/.claude.json
-</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;hasCompletedOnboarding&#34;</span>: true
-</span></span></code></pre></div><p>3.最后在自己的项目目录下启动cluade使用。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>claude
-</span></span></code></pre></div>
+          <h1 id="1chain">1.Chain</h1>
+<h2 id="11大模型链llmchain">1.1.大模型链LLMChain</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> LLMChain(prompt<span style="color:#f92672">=</span>prompt, llm<span style="color:#f92672">=</span>chat_llm)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chain类的5种运行方式</span>
+</span></span><span style="display:flex;"><span>print(chain(<span style="color:#e6db74">&#34;你是谁&#34;</span>))
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>run(<span style="color:#e6db74">&#34;你是谁&#34;</span>))
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>apply([{<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}]))
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>generate([{<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}]))
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>predict(query<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;你是谁&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># runnable的invoke运行方法</span>
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;你是谁&#34;</span>}))
+</span></span></code></pre></div><h2 id="12对话链conversationchain">1.2.对话链ConversationChain</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> ConversationChain(llm<span style="color:#f92672">=</span>chat_llm)  <span style="color:#75715e"># 自带记忆组件</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 第一轮对话</span>
+</span></span><span style="display:flex;"><span>content <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;你好，我是小z，我喜欢打球+游泳，你喜欢什么呢？&#34;</span>})
+</span></span><span style="display:flex;"><span>print(content)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 第二轮对话（基于上下文）</span>
+</span></span><span style="display:flex;"><span>content <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;请统计一下我的爱好有什么&#34;</span>})
+</span></span><span style="display:flex;"><span>print(content)
+</span></span></code></pre></div><h2 id="13文档对话链create_stuff_documents_chain">1.3.文档对话链create_stuff_documents_chain</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 1. 创建提示模板</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;你是一个强大的聊天机器人，能根据用户提供的上下文来回复用户的问题。</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&lt;context&gt;</span><span style="color:#e6db74">{context}</span><span style="color:#e6db74">&lt;/context&gt;&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. 创建链应用</span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> create_stuff_documents_chain(prompt<span style="color:#f92672">=</span>prompt, llm<span style="color:#f92672">=</span>chat_llm)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. 文档列表</span>
+</span></span><span style="display:flex;"><span>documents <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    Document(page_content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;小明喜欢绿色，但不喜欢黄色&#34;</span>),
+</span></span><span style="display:flex;"><span>    Document(page_content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;小王喜欢粉色，也有一点喜欢红色&#34;</span>),
+</span></span><span style="display:flex;"><span>    Document(page_content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;小泽喜欢蓝色，但更喜欢青色&#34;</span>)
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. 调用链</span>
+</span></span><span style="display:flex;"><span>out <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke({
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;请帮我统计一下大家都喜欢什么颜色&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;context&#34;</span>: documents
+</span></span><span style="display:flex;"><span>})
+</span></span><span style="display:flex;"><span>print(out)
+</span></span></code></pre></div><h1 id="2runnables-可视化">2.Runnables 可视化</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># pip install grandalf</span>
+</span></span><span style="display:flex;"><span>print(chain<span style="color:#f92672">.</span>get_graph()<span style="color:#f92672">.</span>print_ascii())
+</span></span></code></pre></div><h1 id="3langchiansmith">3.LangchianSmith</h1>
+<p>在tracing里面新建一个project，然后按照提示在env里面设置即可.</p>
+
           </article>
         </div>
       </div>
@@ -368,7 +398,13 @@
                 Table Of Contents
               </h5>
               <div class="toc-content">
-                <nav id="TableOfContents"></nav>
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11大模型链llmchain">1.1.大模型链LLMChain</a></li>
+    <li><a href="#12对话链conversationchain">1.2.对话链ConversationChain</a></li>
+    <li><a href="#13文档对话链create_stuff_documents_chain">1.3.文档对话链create_stuff_documents_chain</a></li>
+  </ul>
+</nav>
               </div>
           </aside>
           
@@ -378,9 +414,13 @@
             <h5>Tags</h5>
             <ul class="tags-ul list-unstyled list-inline">
               
-              <li class="list-inline-item"><a href="http://localhost:1313/tags/life"
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/code"
                 target="_blank"
-              >life</a></li>
+              >code</a></li>
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/langchain"
+                target="_blank"
+              >langchain</a></li>
               
             </ul>
           </aside>
@@ -392,22 +432,22 @@
             <div class="social-content">
               <ul class="list-inline">
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2f5.chainsmith%2f">
                     <i class="fab fa-linkedin"></i>
                   </a>
                 </li>
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href='https://twitter.com/share?text=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f&hashtags=life'>
+                  <a target="_blank" href='https://twitter.com/share?text=5.Chain&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f5.chainsmith%2f&hashtags=code%2clangchain'>
                     <i class="fab fa-twitter"></i>
                   </a>
                 </li>
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href="https://api.whatsapp.com/send?text=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code: http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=5.Chain: http%3a%2f%2flocalhost%3a1313%2fblogs%2f5.chainsmith%2f">
                     <i class="fab fa-whatsapp"></i>
                   </a>
                 </li>
                 <li class="list-inline-item text-center">
-                  <a target="_blank" href='mailto:?subject=%e4%b8%8d%e7%bf%bb%e5%a2%99%e4%bd%bf%e7%94%a8Claude-code&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f%25E4%25B8%258D%25E7%25BF%25BB%25E5%25A2%2599%25E4%25BD%25BF%25E7%2594%25A8claude_code%2f'>
+                  <a target="_blank" href='mailto:?subject=5.Chain&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f5.chainsmith%2f'>
                     <i class="fa fa-envelope"></i>
                   </a>
                 </li>

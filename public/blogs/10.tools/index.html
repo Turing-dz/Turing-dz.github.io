@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+<link rel="icon" href=/fav.png type="image/gif">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      media="print" onload="this.media='all'" />
+<noscript>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
+</noscript>
+
+
+<link rel="stylesheet" href="/css/font.css" media="all">
+
+
+
+<meta property="og:url" content="http://localhost:1313/blogs/10.tools/">
+  <meta property="og:site_name" content="Profile">
+  <meta property="og:title" content="10.Tools">
+  <meta property="og:description" content="参考：https://docs.langchain.com/oss/javascript/langchain/tools
+模型的Function Call功能
+1.langchain内置工具(包)
+在 LangChain 中，所有工具都是 BaseTool 的子类，并且工具也是 Runnable 可运行组件，支持通过 invoke、batch 和 stream 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 invoke 函数即可，除此之外，可以通过 name、description、args、return_direct 属性来获取到工具的相关信息。
+内置工具tools与内置工具包toolkits里面有很多现成工具。
+1.1.内置工具DuckDuckGoSearchResults from langchain_community.tools import DuckDuckGoSearchRun,DuckDuckGoSearchResults from langchain_core.utils.function_calling import convert_to_openai_tool # pip install duckduckgo-search # pip install -U ddgs # 1.工具实例化 # search = DuckDuckGoSearchRun() search = DuckDuckGoSearchResults() # result比run返回的参数更多，封装更完整 print(search.invoke(&#34;今天的美国新闻&#34;)) # invok e调用工具 print(search.run(&#34;今天的美国新闻&#34;)) # run调用工具 print(convert_to_openai_tool(search)) # convert_to_openai_tool转换成openai等模型使用的tool的格式 print(search) print(&#34;名字：&#34;, search.name) print(&#34;描述：&#34;, search.description) print(&#34;参数：&#34;, search.args) print(&#34;是否直接返回：&#34;, search.return_direct) 1.2.内置工具GoogleSerperRun import dotenv from langchain_community.tools import GoogleSerperRun from langchain_community.utilities import GoogleSerperAPIWrapper from pydantic import BaseModel, Field # 定义工具参数 Schema class GoogleSerperArgsSchema(BaseModel): query: str = Field(description=&#34;执行谷歌搜索的查询语句&#34;) dotenv.load_dotenv() # 创建 Google Serper 搜索工具 google_serper = GoogleSerperRun( name=&#34;google_serper&#34;, description=( &#34;一个低成本的谷歌搜索API。&#34; &#34;当你需要回答有关时事的问题时，可以调用该工具。&#34; &#34;该工具的输入是搜索查询语句。&#34; ), args_schema=GoogleSerperArgsSchema, api_wrapper=GoogleSerperAPIWrapper(), ) # 调用工具进行搜索 print(google_serper.invoke({ &#34;query&#34;: &#34;今天的美国股票新闻&#34; })) 2.自定义工具 在LangChain中提供了3种构建自定义工具的方法：@tool装饰器，StructuredTool.from_function()类方法，BaseTool子类。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blogs">
+    <meta property="article:published_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:modified_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:tag" content="Code">
+    <meta property="article:tag" content="Langchain">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="10.Tools">
+  <meta name="twitter:description" content="参考：https://docs.langchain.com/oss/javascript/langchain/tools
+模型的Function Call功能
+1.langchain内置工具(包)
+在 LangChain 中，所有工具都是 BaseTool 的子类，并且工具也是 Runnable 可运行组件，支持通过 invoke、batch 和 stream 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 invoke 函数即可，除此之外，可以通过 name、description、args、return_direct 属性来获取到工具的相关信息。
+内置工具tools与内置工具包toolkits里面有很多现成工具。
+1.1.内置工具DuckDuckGoSearchResults from langchain_community.tools import DuckDuckGoSearchRun,DuckDuckGoSearchResults from langchain_core.utils.function_calling import convert_to_openai_tool # pip install duckduckgo-search # pip install -U ddgs # 1.工具实例化 # search = DuckDuckGoSearchRun() search = DuckDuckGoSearchResults() # result比run返回的参数更多，封装更完整 print(search.invoke(&#34;今天的美国新闻&#34;)) # invok e调用工具 print(search.run(&#34;今天的美国新闻&#34;)) # run调用工具 print(convert_to_openai_tool(search)) # convert_to_openai_tool转换成openai等模型使用的tool的格式 print(search) print(&#34;名字：&#34;, search.name) print(&#34;描述：&#34;, search.description) print(&#34;参数：&#34;, search.args) print(&#34;是否直接返回：&#34;, search.return_direct) 1.2.内置工具GoogleSerperRun import dotenv from langchain_community.tools import GoogleSerperRun from langchain_community.utilities import GoogleSerperAPIWrapper from pydantic import BaseModel, Field # 定义工具参数 Schema class GoogleSerperArgsSchema(BaseModel): query: str = Field(description=&#34;执行谷歌搜索的查询语句&#34;) dotenv.load_dotenv() # 创建 Google Serper 搜索工具 google_serper = GoogleSerperRun( name=&#34;google_serper&#34;, description=( &#34;一个低成本的谷歌搜索API。&#34; &#34;当你需要回答有关时事的问题时，可以调用该工具。&#34; &#34;该工具的输入是搜索查询语句。&#34; ), args_schema=GoogleSerperArgsSchema, api_wrapper=GoogleSerperAPIWrapper(), ) # 调用工具进行搜索 print(google_serper.invoke({ &#34;query&#34;: &#34;今天的美国股票新闻&#34; })) 2.自定义工具 在LangChain中提供了3种构建自定义工具的方法：@tool装饰器，StructuredTool.from_function()类方法，BaseTool子类。">
+
+
+<link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
+<link rel="stylesheet" href="/css/footer.css" media="all">
+
+
+<link rel="stylesheet" href="/css/theme.css" media="all">
+
+<style>
+    :root {
+        --text-color: #343a40;
+        --text-secondary-color: #6c757d;
+        --text-link-color: #007bff;
+        --background-color: #eaedf0;
+        --secondary-background-color: #64ffda1a;
+        --primary-color: #007bff;
+        --secondary-color: #f8f9fa;
+
+         
+        --text-color-dark: #e4e6eb;
+        --text-secondary-color-dark: #b0b3b8;
+        --text-link-color-dark: #ffffff;
+        --background-color-dark: #18191a;
+        --secondary-background-color-dark: #212529;
+        --primary-color-dark: #ffffff;
+        --secondary-color-dark: #212529;
+    }
+    body {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    html {
+        background-color: var(--background-color) !important;
+    }
+
+    body::-webkit-scrollbar {
+        height: 0px;
+        width: 8px;
+        background-color: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 1rem;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 1rem;
+        background: #b0b0b0;
+        outline: 1px solid var(--background-color);
+    }
+
+    #search-content::-webkit-scrollbar {
+        width: .5em;
+        height: .1em;
+        background-color: var(--background-color);
+    }
+</style>
+
+
+
+<meta name="description" content="">
+<link rel="stylesheet" href="/css/single.css">
+
+
+<script defer src="/fontawesome-6/all-6.4.2.js"></script>
+
+
+  
+  
+
+  <title>
+10.Tools | Profile
+
+  </title>
+</head>
+
+<body class="light">
+  
+  
+<script>
+    let localStorageValue = localStorage.getItem("pref-theme");
+    let mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    switch (localStorageValue) {
+        case "dark":
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            break;
+        case "light":
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            break;
+        default:
+            if (mediaQuery) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            }
+            break;
+    }
+</script>
+
+
+
+
+<script>
+    var prevScrollPos = window.pageYOffset;
+    window.addEventListener("scroll", function showHeaderOnScroll() {
+        let profileHeaderElem = document.getElementById("profileHeader");
+        let currentScrollPos = window.pageYOffset;
+        let resetHeaderStyle = false;
+        let showNavBarOnScrollUp =  true ;
+        let showNavBar = showNavBarOnScrollUp ? prevScrollPos > currentScrollPos : currentScrollPos > 0;
+        if (showNavBar) {
+            profileHeaderElem.classList.add("showHeaderOnTop");
+        } else {
+            resetHeaderStyle = true;
+        }
+        if(currentScrollPos === 0) {
+            resetHeaderStyle = true;
+        }
+        if(resetHeaderStyle) {
+            profileHeaderElem.classList.remove("showHeaderOnTop");
+        }
+        prevScrollPos = currentScrollPos;
+    });
+</script>
+
+
+
+<header id="profileHeader">
+    <nav class="pt-3 navbar navbar-expand-lg animate">
+        <div class="container-fluid mx-xs-2 mx-sm-5 mx-md-5 mx-lg-5">
+            
+            <a class="navbar-brand primary-font text-wrap" href="/">
+                
+                <img src="/fav.png" width="30" height="30"
+                    class="d-inline-block align-top">
+                Profile
+                
+            </a>
+
+            
+                <div>
+                    <input id="search" autocomplete="off" class="form-control mr-sm-2 d-none d-md-block" placeholder='Ctrl &#43; k to Search...'
+                        aria-label="Search" oninput="searchOnChange(event)">
+                </div>
+            
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true">
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </button>
+
+            
+            <div class="collapse navbar-collapse text-wrap primary-font" id="navbarContent">
+                <ul class="navbar-nav ms-auto text-center">
+                    
+                        <li class="nav-item navbar-text d-block d-md-none">
+                            <div class="nav-link">
+                                <input id="search" autocomplete="off" class="form-control mr-sm-2" placeholder='Ctrl &#43; k to Search...' aria-label="Search" oninput="searchOnChange(event)">
+                            </div>
+                        </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#about" aria-label="about">
+                            About Me
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#experience"
+                            aria-label="experience">
+                            Experience
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#education"
+                            aria-label="education">
+                            Education
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#contact"
+                            aria-label="contact">
+                            Contact
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/blogs" title="Blog posts">
+                            
+                            Blog
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/gallery" title="Blog posts">
+                            
+                            Gallery
+                        </a>
+                    </li>
+                    
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        
+                        <div class="text-center">
+                            <button id="theme-toggle">
+                                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                    
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+<div id="content">
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">10.Tools</h1>
+            <div class="text-center">
+              
+                Zoe
+                <small>|</small>
+              
+              Dec 17, 2025
+
+              
+              <span id="readingTime">
+                min read
+              </span>
+              
+            </div>
+          </div>
+          
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="/images/blogs/10tools.png" alt="10.Tools">
+          </div>
+          
+          <article class="page-content  p-2">
+          <h1></h1>
+<p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具包toolkits里面有很多现成工具。</p>
+<h2 id="11内置工具duckduckgosearchresults">1.1.内置工具DuckDuckGoSearchResults</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.tools <span style="color:#f92672">import</span> DuckDuckGoSearchRun,DuckDuckGoSearchResults
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.utils.function_calling <span style="color:#f92672">import</span> convert_to_openai_tool
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># pip install duckduckgo-search</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># pip install -U ddgs</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.工具实例化</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># search = DuckDuckGoSearchRun()</span>
+</span></span><span style="display:flex;"><span>search <span style="color:#f92672">=</span> DuckDuckGoSearchResults()  <span style="color:#75715e"># result比run返回的参数更多，封装更完整</span>
+</span></span><span style="display:flex;"><span>print(search<span style="color:#f92672">.</span>invoke(<span style="color:#e6db74">&#34;今天的美国新闻&#34;</span>))  <span style="color:#75715e"># invok e调用工具</span>
+</span></span><span style="display:flex;"><span>print(search<span style="color:#f92672">.</span>run(<span style="color:#e6db74">&#34;今天的美国新闻&#34;</span>))  <span style="color:#75715e"># run调用工具</span>
+</span></span><span style="display:flex;"><span>print(convert_to_openai_tool(search))  <span style="color:#75715e"># convert_to_openai_tool转换成openai等模型使用的tool的格式</span>
+</span></span><span style="display:flex;"><span>print(search)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;名字：&#34;</span>, search<span style="color:#f92672">.</span>name)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;描述：&#34;</span>, search<span style="color:#f92672">.</span>description)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;参数：&#34;</span>, search<span style="color:#f92672">.</span>args)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;是否直接返回：&#34;</span>, search<span style="color:#f92672">.</span>return_direct)
+</span></span></code></pre></div><h2 id="12内置工具googleserperrun">1.2.内置工具GoogleSerperRun</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.tools <span style="color:#f92672">import</span> GoogleSerperRun
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.utilities <span style="color:#f92672">import</span> GoogleSerperAPIWrapper
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pydantic <span style="color:#f92672">import</span> BaseModel, Field
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义工具参数 Schema</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GoogleSerperArgsSchema</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    query: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;执行谷歌搜索的查询语句&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 创建 Google Serper 搜索工具</span>
+</span></span><span style="display:flex;"><span>google_serper <span style="color:#f92672">=</span> GoogleSerperRun(
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;google_serper&#34;</span>,
+</span></span><span style="display:flex;"><span>    description<span style="color:#f92672">=</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;一个低成本的谷歌搜索API。&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;当你需要回答有关时事的问题时，可以调用该工具。&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;该工具的输入是搜索查询语句。&#34;</span>
+</span></span><span style="display:flex;"><span>    ),
+</span></span><span style="display:flex;"><span>    args_schema<span style="color:#f92672">=</span>GoogleSerperArgsSchema,
+</span></span><span style="display:flex;"><span>    api_wrapper<span style="color:#f92672">=</span>GoogleSerperAPIWrapper(),
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 调用工具进行搜索</span>
+</span></span><span style="display:flex;"><span>print(google_serper<span style="color:#f92672">.</span>invoke({
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;今天的美国股票新闻&#34;</span>
+</span></span><span style="display:flex;"><span>}))
+</span></span></code></pre></div><h1 id="2自定义工具">2.自定义工具</h1>
+<p>在LangChain中提供了3种构建自定义工具的方法：@tool装饰器，StructuredTool.from_function()类方法，BaseTool子类。</p>
+<h2 id="21tool装饰器">2.1@tool装饰器</h2>
+<p>该方法必须提供文档字符串。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> tool
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pydantic <span style="color:#f92672">import</span> Field
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MultiplyInputs</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    a: int <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;第一个数字&#34;</span>)
+</span></span><span style="display:flex;"><span>    b: int <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;第二个数字&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@tool</span>(<span style="color:#e6db74">&#34;multiply_tool&#34;</span>, return_direct<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, args_schema<span style="color:#f92672">=</span>MultiplyInputs)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(a: int, b: int) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;将传递的两个数字相乘&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;名字：&#34;</span>, multiply<span style="color:#f92672">.</span>name)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;描述：&#34;</span>, multiply<span style="color:#f92672">.</span>description)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;参数：&#34;</span>, multiply<span style="color:#f92672">.</span>args)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;是否直接返回：&#34;</span>, multiply<span style="color:#f92672">.</span>return_direct)
+</span></span><span style="display:flex;"><span>print(multiply<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;a&#34;</span>: <span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#34;b&#34;</span>: <span style="color:#ae81ff">2</span>}))
+</span></span></code></pre></div><h2 id="22structuredtool类方法">2.2.StructuredTool类方法</h2>
+<p>支持同步与异步方法。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> StructuredTool
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MultiplyInputs</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    a: int <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;第一个数字&#34;</span>)
+</span></span><span style="display:flex;"><span>    b: int <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;第二个数字&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(a: int, b: int) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;将传递的两个数字相乘&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">amultiply</span>(a: int, b: int) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;将传递的两个数字相乘&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>calculator <span style="color:#f92672">=</span> StructuredTool<span style="color:#f92672">.</span>from_function(
+</span></span><span style="display:flex;"><span>    func<span style="color:#f92672">=</span>multiply,
+</span></span><span style="display:flex;"><span>    coroutine<span style="color:#f92672">=</span>amultiply,
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;multiply_tool&#34;</span>,
+</span></span><span style="display:flex;"><span>    description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;将传递的两个数字相乘&#34;</span>,
+</span></span><span style="display:flex;"><span>    return_direct<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>    args_schema<span style="color:#f92672">=</span>MultiplyInputs,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;名字：&#34;</span>, calculator<span style="color:#f92672">.</span>name)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;描述：&#34;</span>, calculator<span style="color:#f92672">.</span>description)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;参数：&#34;</span>, calculator<span style="color:#f92672">.</span>args)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;是否直接返回：&#34;</span>, calculator<span style="color:#f92672">.</span>return_direct)
+</span></span><span style="display:flex;"><span>print(calculator<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;a&#34;</span>: <span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#34;b&#34;</span>: <span style="color:#ae81ff">2</span>}))
+</span></span></code></pre></div><h2 id="23basetool子类">2.3.BaseTool子类</h2>
+<p>在LangChain中所有的工具都BaseTool子类，所以以上两种方式都是包装成StruceuredTool，也就是BaseTool的子类。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Type, Any
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> BaseTool
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MultiplyInputs</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    a: int <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;第一个数字&#34;</span>)
+</span></span><span style="display:flex;"><span>    b: int <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;第二个数字&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MultiplyTool</span>(BaseTool):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;乘法计算工具&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    name: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;multiply_tool&#34;</span>
+</span></span><span style="display:flex;"><span>    description: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;两数相乘&#34;</span>
+</span></span><span style="display:flex;"><span>    args_schema: Type[BaseModel] <span style="color:#f92672">=</span> MultiplyInputs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_run</span>(self, a: int, b: int) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>calculator <span style="color:#f92672">=</span> MultiplyTool()
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;名字：&#34;</span>, calculator<span style="color:#f92672">.</span>name)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;描述：&#34;</span>, calculator<span style="color:#f92672">.</span>description)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;参数：&#34;</span>, calculator<span style="color:#f92672">.</span>args)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;是否直接返回：&#34;</span>, calculator<span style="color:#f92672">.</span>return_direct)
+</span></span><span style="display:flex;"><span>print(calculator<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;a&#34;</span>: <span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#34;b&#34;</span>: <span style="color:#ae81ff">2</span>}))
+</span></span></code></pre></div><h1 id="3工具应用bind_tools">3.工具应用bind_tools</h1>
+<p>bind函数的二次封装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Type, Any
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.tools <span style="color:#f92672">import</span> GoogleSerperRun
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.utilities <span style="color:#f92672">import</span> GoogleSerperAPIWrapper
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.messages <span style="color:#f92672">import</span> ToolMessage
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.prompts <span style="color:#f92672">import</span> ChatPromptTemplate
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.runnables <span style="color:#f92672">import</span> RunnablePassthrough
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> BaseTool
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_openai <span style="color:#f92672">import</span> ChatOpenAI
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pydantic <span style="color:#f92672">import</span> BaseModel, Field
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义工具参数 Schema</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GoogleSerperArgsSchema</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    query: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;执行谷歌搜索的查询语句&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 加载环境变量（如 API Key）</span>
+</span></span><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 创建 Google Serper 搜索工具</span>
+</span></span><span style="display:flex;"><span>google_serper <span style="color:#f92672">=</span> GoogleSerperRun(
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;google_serper&#34;</span>,
+</span></span><span style="display:flex;"><span>    description<span style="color:#f92672">=</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;一个低成本的谷歌搜索API。&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;当你需要回答有关时事的问题时，可以调用该工具。&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;该工具的输入是搜索查询语句。&#34;</span>
+</span></span><span style="display:flex;"><span>    ),
+</span></span><span style="display:flex;"><span>    args_schema<span style="color:#f92672">=</span>GoogleSerperArgsSchema,
+</span></span><span style="display:flex;"><span>    api_wrapper<span style="color:#f92672">=</span>GoogleSerperAPIWrapper(),
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GaoDeInputs</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    city: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;查询天气的目标城市，例如：北京市&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GetWeatherTool</span>(BaseTool):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;根据传入的天气名称查询天气&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    name: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;get_weather_tool&#34;</span>
+</span></span><span style="display:flex;"><span>    description: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;使用此工具，根据城市名称查询对应天气&#34;</span>
+</span></span><span style="display:flex;"><span>    args_schema: Type[BaseModel] <span style="color:#f92672">=</span> GaoDeInputs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_adcode</span>(self, city):
+</span></span><span style="display:flex;"><span>        df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_excel(<span style="color:#e6db74">&#34;/Users/zoe/Downloads/AMap_adcode_citycode.xlsx&#34;</span>)  <span style="color:#75715e"># 替换为你的文件路径</span>
+</span></span><span style="display:flex;"><span>        result <span style="color:#f92672">=</span> df[df[<span style="color:#e6db74">&#39;中文名&#39;</span>] <span style="color:#f92672">==</span> city][<span style="color:#e6db74">&#39;adcode&#39;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> result<span style="color:#f92672">.</span>to_string()<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39; &#39;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_run</span>(self, <span style="color:#f92672">*</span>args: Any, <span style="color:#f92672">**</span>kwargs: Any) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>        gaode_api_key: str <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;GAODE_API_KEY&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> gaode_api_key:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;高德apikey未配置&#34;</span>
+</span></span><span style="display:flex;"><span>        city: str <span style="color:#f92672">=</span> kwargs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;city&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>        ad_code <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_adcode(city)
+</span></span><span style="display:flex;"><span>        session <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>session()
+</span></span><span style="display:flex;"><span>        weather_response <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span>request(
+</span></span><span style="display:flex;"><span>            method<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;GET&#34;</span>,
+</span></span><span style="display:flex;"><span>            url<span style="color:#f92672">=</span><span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://restapi.amap.com/v3/weather/weatherInfo?key=</span><span style="color:#e6db74">{</span>gaode_api_key<span style="color:#e6db74">}</span><span style="color:#e6db74">&amp;city=</span><span style="color:#e6db74">{</span>ad_code<span style="color:#e6db74">}</span><span style="color:#e6db74">&amp;extensions=all&#34;</span>,
+</span></span><span style="display:flex;"><span>            headers<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;Content-Type&#34;</span>: <span style="color:#e6db74">&#34;application/json; charset=utf-8&#34;</span>},
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        weather_response<span style="color:#f92672">.</span>raise_for_status()
+</span></span><span style="display:flex;"><span>        weather_data <span style="color:#f92672">=</span> weather_response<span style="color:#f92672">.</span>json()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> weather_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;info&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;OK&#34;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 5. 返回最后的结果字符串</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> json<span style="color:#f92672">.</span>dumps(weather_data, ensure_ascii<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, indent<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;获取 </span><span style="color:#e6db74">{</span>city<span style="color:#e6db74">}</span><span style="color:#e6db74"> 天气预报信息失败：</span><span style="color:#e6db74">{</span>weather_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;info&#39;</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>gd <span style="color:#f92672">=</span> GetWeatherTool()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.工具组装为字典(工具名作为键，工具作为值)</span>
+</span></span><span style="display:flex;"><span>tool_dict <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    gd<span style="color:#f92672">.</span>name: gd,
+</span></span><span style="display:flex;"><span>    google_serper<span style="color:#f92672">.</span>name: google_serper,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.组装成工具列表</span>
+</span></span><span style="display:flex;"><span>tools <span style="color:#f92672">=</span> [tool <span style="color:#66d9ef">for</span> tool <span style="color:#f92672">in</span> tool_dict<span style="color:#f92672">.</span>values()]
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.模型</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;回答用户问题，必要时调用工具&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOpenAI(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-3.5-turbo&#34;</span>, base_url<span style="color:#f92672">=</span>os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_BASE&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4.模型绑定tools</span>
+</span></span><span style="display:flex;"><span>llm_with_tools <span style="color:#f92672">=</span> llm<span style="color:#f92672">.</span>bind_tools(tools<span style="color:#f92672">=</span>tools)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chain = {&#34;query&#34;: RunnablePassthrough()} | prompt | llm</span>
+</span></span><span style="display:flex;"><span>chain2 <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;query&#34;</span>: RunnablePassthrough()} <span style="color:#f92672">|</span> prompt <span style="color:#f92672">|</span> llm_with_tools
+</span></span><span style="display:flex;"><span>query <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;北京市今天穿什么衣服合适&#34;</span>
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain2<span style="color:#f92672">.</span>invoke(query)
+</span></span><span style="display:flex;"><span>print(res)
+</span></span><span style="display:flex;"><span>tool_calls <span style="color:#f92672">=</span> res<span style="color:#f92672">.</span>tool_calls
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> len(tool_calls) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>    print(res<span style="color:#f92672">.</span>content)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将历史消息进行整合</span>
+</span></span><span style="display:flex;"><span>    messages <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>invoke(query)<span style="color:#f92672">.</span>to_messages()
+</span></span><span style="display:flex;"><span>    messages<span style="color:#f92672">.</span>append(res)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用工具</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> tool_call <span style="color:#f92672">in</span> tool_calls:
+</span></span><span style="display:flex;"><span>        tool <span style="color:#f92672">=</span> tool_dict<span style="color:#f92672">.</span>get(tool_call<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;name&#34;</span>))
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;正在执行代码：&#34;</span>, tool_call<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;name&#34;</span>))
+</span></span><span style="display:flex;"><span>        content <span style="color:#f92672">=</span> tool<span style="color:#f92672">.</span>invoke(tool_call<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;args&#34;</span>))
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;工具返回结果&#34;</span>, content)
+</span></span><span style="display:flex;"><span>        tool_call_id <span style="color:#f92672">=</span> tool_call<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;id&#34;</span>)
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">.</span>append(ToolMessage(content<span style="color:#f92672">=</span>content, tool_call_id<span style="color:#f92672">=</span>tool_call_id))
+</span></span><span style="display:flex;"><span>    print(llm<span style="color:#f92672">.</span>invoke(messages)<span style="color:#f92672">.</span>content)
+</span></span></code></pre></div><h1 id="4无functioncall功能的调用">4.无FunctionCall功能的调用</h1>
+<p>这时只能使用prompt来实现。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Type, Any, TypedDict, Dict, Optional
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.tools <span style="color:#f92672">import</span> GoogleSerperRun
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.utilities <span style="color:#f92672">import</span> GoogleSerperAPIWrapper
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.output_parsers <span style="color:#f92672">import</span> JsonOutputParser
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.prompts <span style="color:#f92672">import</span> ChatPromptTemplate
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.runnables <span style="color:#f92672">import</span> RunnableConfig, RunnablePassthrough
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> BaseTool, render_text_description_and_args
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_openai <span style="color:#f92672">import</span> ChatOpenAI
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langgraph.prebuilt.tool_node <span style="color:#f92672">import</span> ToolCallRequest
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pydantic <span style="color:#f92672">import</span> BaseModel, Field
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义工具参数 Schema</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GoogleSerperArgsSchema</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    query: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;执行谷歌搜索的查询语句&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 加载环境变量（如 API Key）</span>
+</span></span><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 创建 Google Serper 搜索工具</span>
+</span></span><span style="display:flex;"><span>google_serper <span style="color:#f92672">=</span> GoogleSerperRun(
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;google_serper&#34;</span>,
+</span></span><span style="display:flex;"><span>    description<span style="color:#f92672">=</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;一个低成本的谷歌搜索API。&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;当你需要回答有关时事的问题时，可以调用该工具。&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;该工具的输入是搜索查询语句。&#34;</span>
+</span></span><span style="display:flex;"><span>    ),
+</span></span><span style="display:flex;"><span>    args_schema<span style="color:#f92672">=</span>GoogleSerperArgsSchema,
+</span></span><span style="display:flex;"><span>    api_wrapper<span style="color:#f92672">=</span>GoogleSerperAPIWrapper(),
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GaoDeInputs</span>(BaseModel):
+</span></span><span style="display:flex;"><span>    city: str <span style="color:#f92672">=</span> Field(description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;查询天气的目标城市，例如：北京市&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GetWeatherTool</span>(BaseTool):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;根据传入的天气名称查询天气&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    name: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;get_weather_tool&#34;</span>
+</span></span><span style="display:flex;"><span>    description: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;使用此工具，根据城市名称查询对应天气&#34;</span>
+</span></span><span style="display:flex;"><span>    args_schema: Type[BaseModel] <span style="color:#f92672">=</span> GaoDeInputs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_adcode</span>(self, city):
+</span></span><span style="display:flex;"><span>        df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_excel(<span style="color:#e6db74">&#34;/Users/zoe/Downloads/AMap_adcode_citycode.xlsx&#34;</span>)  <span style="color:#75715e"># 替换为你的文件路径</span>
+</span></span><span style="display:flex;"><span>        result <span style="color:#f92672">=</span> df[df[<span style="color:#e6db74">&#39;中文名&#39;</span>] <span style="color:#f92672">==</span> city][<span style="color:#e6db74">&#39;adcode&#39;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> result<span style="color:#f92672">.</span>to_string()<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39; &#39;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_run</span>(self, <span style="color:#f92672">*</span>args: Any, <span style="color:#f92672">**</span>kwargs: Any) <span style="color:#f92672">-&gt;</span> Any:
+</span></span><span style="display:flex;"><span>        gaode_api_key: str <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;GAODE_API_KEY&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> gaode_api_key:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;高德apikey未配置&#34;</span>
+</span></span><span style="display:flex;"><span>        city: str <span style="color:#f92672">=</span> kwargs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;city&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>        ad_code <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_adcode(city)
+</span></span><span style="display:flex;"><span>        session <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>session()
+</span></span><span style="display:flex;"><span>        weather_response <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span>request(
+</span></span><span style="display:flex;"><span>            method<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;GET&#34;</span>,
+</span></span><span style="display:flex;"><span>            url<span style="color:#f92672">=</span><span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;https://restapi.amap.com/v3/weather/weatherInfo?key=</span><span style="color:#e6db74">{</span>gaode_api_key<span style="color:#e6db74">}</span><span style="color:#e6db74">&amp;city=</span><span style="color:#e6db74">{</span>ad_code<span style="color:#e6db74">}</span><span style="color:#e6db74">&amp;extensions=all&#34;</span>,
+</span></span><span style="display:flex;"><span>            headers<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;Content-Type&#34;</span>: <span style="color:#e6db74">&#34;application/json; charset=utf-8&#34;</span>},
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        weather_response<span style="color:#f92672">.</span>raise_for_status()
+</span></span><span style="display:flex;"><span>        weather_data <span style="color:#f92672">=</span> weather_response<span style="color:#f92672">.</span>json()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> weather_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;info&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;OK&#34;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 5. 返回最后的结果字符串</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> json<span style="color:#f92672">.</span>dumps(weather_data, ensure_ascii<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, indent<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;获取 </span><span style="color:#e6db74">{</span>city<span style="color:#e6db74">}</span><span style="color:#e6db74"> 天气预报信息失败：</span><span style="color:#e6db74">{</span>weather_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;info&#39;</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>get_weather_tool <span style="color:#f92672">=</span> GetWeatherTool()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.工具组装为字典(工具名作为键，工具作为值)</span>
+</span></span><span style="display:flex;"><span>tool_dict <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    get_weather_tool<span style="color:#f92672">.</span>name: get_weather_tool,
+</span></span><span style="display:flex;"><span>    google_serper<span style="color:#f92672">.</span>name: google_serper,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.组装成工具列表</span>
+</span></span><span style="display:flex;"><span>tools <span style="color:#f92672">=</span> [tool <span style="color:#66d9ef">for</span> tool <span style="color:#f92672">in</span> tool_dict<span style="color:#f92672">.</span>values()]
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.将tool转换成str</span>
+</span></span><span style="display:flex;"><span>tool_prompt <span style="color:#f92672">=</span> render_text_description_and_args(tools)
+</span></span><span style="display:flex;"><span>system_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;你是一个由OpenAI开发的聊天机器人，可以访问以下工具。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">以下是每个工具的名称和描述：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{rendered_tools}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">根据用户输入，返回要使用的工具的名称和输入。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">将您的响应作为具有 `name` 和 `arguments` 键的JSON块返回。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">`arguments` 应该是一个字典，其中键对应于参数名称，值对应于请求的值。&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, system_prompt),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{query}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])<span style="color:#f92672">.</span>partial(rendered_tools<span style="color:#f92672">=</span>tool_prompt)
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOpenAI(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-3.5-turbo&#34;</span>, base_url<span style="color:#f92672">=</span>os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_BASE&#34;</span>))
+</span></span><span style="display:flex;"><span>query <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;query&#34;</span>: <span style="color:#e6db74">&#34;北京市今天穿什么衣服合适&#34;</span>}
+</span></span><span style="display:flex;"><span>print(prompt<span style="color:#f92672">.</span>invoke(query))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ToolInput</span>(TypedDict):
+</span></span><span style="display:flex;"><span>    name: str
+</span></span><span style="display:flex;"><span>    arguments: Dict[str, Any]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">invoke_tool</span>(
+</span></span><span style="display:flex;"><span>        tool_call_request: ToolCallRequest,
+</span></span><span style="display:flex;"><span>        config: Optional[RunnableConfig] <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    我们可以使用的执行工具调用的函数。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param tool_call_request: 一个包含键名和参数的字典，名称必须与现有的工具名称匹配，参数是该工具的参数
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param config: 这是LangChain中包含回调、元数据等信息的配置信息。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: 工具执行的结果。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> tool_call_request[<span style="color:#e6db74">&#34;name&#34;</span>]
+</span></span><span style="display:flex;"><span>    requested_tool <span style="color:#f92672">=</span> tool_dict<span style="color:#f92672">.</span>get(name)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> requested_tool<span style="color:#f92672">.</span>invoke(tool_call_request<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;arguments&#34;</span>), config<span style="color:#f92672">=</span>config)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chain <span style="color:#f92672">=</span> prompt <span style="color:#f92672">|</span> llm <span style="color:#f92672">|</span> JsonOutputParser() <span style="color:#f92672">|</span> RunnablePassthrough<span style="color:#f92672">.</span>assign(output<span style="color:#f92672">=</span>invoke_tool)
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> chain<span style="color:#f92672">.</span>invoke(query)
+</span></span><span style="display:flex;"><span>print(res)
+</span></span></code></pre></div>
+          </article>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg-3">
+        <div id="stickySideBar" class="sticky-sidebar">
+          
+          <aside class="toc">
+              <h5>
+                Table Of Contents
+              </h5>
+              <div class="toc-content">
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11内置工具duckduckgosearchresults">1.1.内置工具DuckDuckGoSearchResults</a></li>
+    <li><a href="#12内置工具googleserperrun">1.2.内置工具GoogleSerperRun</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#21tool装饰器">2.1@tool装饰器</a></li>
+    <li><a href="#22structuredtool类方法">2.2.StructuredTool类方法</a></li>
+    <li><a href="#23basetool子类">2.3.BaseTool子类</a></li>
+  </ul>
+</nav>
+              </div>
+          </aside>
+          
+
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/code"
+                target="_blank"
+              >code</a></li>
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/langchain"
+                target="_blank"
+              >langchain</a></li>
+              
+            </ul>
+          </aside>
+          
+
+          
+          <aside class="social">
+            <h5>Social</h5>
+            <div class="social-content">
+              <ul class="list-inline">
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2f10.tools%2f">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='https://twitter.com/share?text=10.Tools&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f10.tools%2f&hashtags=code%2clangchain'>
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=10.Tools: http%3a%2f%2flocalhost%3a1313%2fblogs%2f10.tools%2f">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='mailto:?subject=10.Tools&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f10.tools%2f'>
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-9 p-4">
+        
+      </div>
+    </div>
+  </div>
+  <button class="p-2 px-3" onclick="topFunction()" id="topScroll">
+    <i class="fas fa-angle-up"></i>
+  </button>
+</section>
+
+
+<div class="progress">
+  <div id="scroll-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<Script src="/js/scrollProgressBar.js"></script>
+
+
+<script>
+  var topScroll = document.getElementById("topScroll");
+  window.onscroll = function() {scrollFunction()};
+
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      topScroll.style.display = "block";
+    } else {
+      topScroll.style.display = "none";
+    }
+  }
+
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+
+  
+  let stickySideBarElem = document.getElementById("stickySideBar");
+  let stickyNavBar =  true ;
+  if(stickyNavBar) {
+    let headerElem = document.getElementById("profileHeader");
+    let headerHeight = headerElem.offsetHeight + 15;
+    stickySideBarElem.style.top = headerHeight + "px";
+  } else {
+    stickySideBarElem.style.top = "50px";
+  }
+</script>
+
+
+<script src="/js/readingTime.js"></script>
+
+
+
+  </div><footer>
+    
+ 
+ 
+<div class="container py-3" id="recent-posts">
+    
+    
+    <div class="h3 text-center text-secondary py-3">
+        Recent Posts
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+                        <img src="/images/blogs/claudecode.jpeg" class="card-img-top" alt="不翻墙使用Claude-code">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="不翻墙使用Claude-code">不翻墙使用Claude-code</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
+<h1 id="1安装claude_code">1.安装claude_code</h1>
+<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
+</span></span><span style="display:flex;"><span>claude -v
+</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
+<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
+</span></span><span style="display:flex;"><span>vi …</span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Feb 21, 2026</span>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/1.prompt/">
+                        <img src="/images/blogs/01prompt.png" class="card-img-top" alt="1.Prompt">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/1.prompt/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="1.Prompt">1.Prompt</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">. …</span></span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/10.tools/">
+                        <img src="/images/blogs/10tools.png" class="card-img-top" alt="10.Tools">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/10.tools/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="10.Tools">10.Tools</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h1></h1>
+<p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具 …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/10.tools/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="text-center pt-2">
+    
+
+    
+
+    
+
+    
+
+    
+</div><div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            
+                <div class="pb-2">
+                    <a href="http://localhost:1313/" title="Profile">
+                        <img alt="Footer logo" src="/fav.png"
+                            height="40px" width="40px">
+                    </a>
+                </div>
+            
+            &copy; 2026  All rights reserved
+            <div class="text-secondary">
+                Made with
+                <span class="text-danger">
+                    &#10084;
+                </span>
+                and
+                <a href="https://github.com/gurusabarish/hugo-profile" target="_blank"
+                    title="Designed and developed by gurusabarish">
+                    Hugo Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</footer><script src="/bootstrap-5/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    }
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+</script>
+
+
+    <script src="/js/search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+  <section id="search-content" class="py-2">
+    <div class="container" id="search-results"></div>
+  </section>
+</body>
+
+</html>

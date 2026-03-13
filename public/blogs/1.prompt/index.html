@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+<link rel="icon" href=/fav.png type="image/gif">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      media="print" onload="this.media='all'" />
+<noscript>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
+</noscript>
+
+
+<link rel="stylesheet" href="/css/font.css" media="all">
+
+
+
+<meta property="og:url" content="http://localhost:1313/blogs/1.prompt/">
+  <meta property="og:site_name" content="Profile">
+  <meta property="og:title" content="1.Prompt">
+  <meta property="og:description" content="安装：pip install langchain langchain-community
+文档：https://docs.langchain.com/oss/python/langchain/messages#openai
+1.prompt template prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。
+1.1.PromptTemplate输入单字符串,适用文本补全模型 # from_template prompt = PromptTemplate.from_template(&#34;讲个{topic}相关的{content}&#34;)#&lt;class &#39;langchain_core.prompts.prompt.PromptTemplate&#39;&gt; prompt.pretty_print() # 1.partial(输入部分变量，输出新的 Template) prompt_partial = prompt.partial(topic=&#34;股票&#34;)#&lt;class &#39;langchain_core.prompts.prompt.PromptTemplate&#39;&gt; # 2.invoke(输入字典，输出PromptValue)，PromptValue 才是 LangChain 世界里的“Prompt 本体” prompt_invoke = prompt.invoke({&#34;topic&#34;: &#34;股票&#34;, &#34;content&#34;: &#34;诗歌&#34;})#&lt;class &#39;langchain_core.prompt_values.StringPromptValue&#39;&gt; print(prompt_invoke.to_string()) #讲个股票相关的诗歌 print(prompt_invoke.to_messages()) #[HumanMessage(content=&#39;讲个股票相关的诗歌&#39;, additional_kwargs={}, response_metadata={})] for i in prompt_invoke.to_messages(): i.pretty_print() # 3.format(输入变量,输出str) prompt_format = prompt.format(topic=&#34;股票&#34;, content=&#34;笑话&#34;)#&lt;class &#39;str&#39;&gt; 1.2.ChatPromptTemplate适用于对话模型 # from_template输入字符传，自动转换为HumanMessagePromptTemplate prompt = ChatPromptTemplate.from_template(&#34;讲个{topic}相关的{content}&#34;)#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt; prompt.pretty_print() # from_messages，有3种输入类型，元组，字典和BaseMessagePromptTemplate # 1.元组(system,AI,placeholder,human)本质还是BaseMessagePromptTemplate chat_template = ChatPromptTemplate.from_messages( [ (&#34;system&#34;, &#34;我是一个{professor}&#34;), (&#34;ai&#34;, &#34;我叫{name}&#34;), (&#34;placeholder&#34;, &#34;{chat_history}&#34;), (&#34;human&#34;, &#34;{user_input}&#34;) ] )#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt; # 2.字典(system,ai,placeholder,human,用role,content) # chat_template = ChatPromptTemplate.from_messages( # [ # {&#39;role&#39;: &#39;system&#39;, &#39;content&#39;: &#39;我是一个{professor}&#39;}, # {&#39;role&#39;: &#39;ai&#39;, &#39;content&#39;: &#39;我叫{name}&#39;}, # {&#39;role&#39;: &#39;placeholder&#39;, &#39;content&#39;: &#34;{chat_history}&#34;}, # {&#39;role&#39;: &#39;human&#39;, &#39;content&#39;: &#39;{user_input}&#39;} # ]) # # # 3.BaseMessagePromptTemplate(SystemMessage,HumanMessage,AIMessage,MessagesPlaceholder) # chat_template = ChatPromptTemplate.from_messages( # [SystemMessagePromptTemplate.from_template(&#34;我是一个{professor}&#34;), # AIMessagePromptTemplate.from_template(&#34;我叫{name}&#34;), # MessagesPlaceholder(&#34;chat_history&#34;, optional=True), #optional可否不传 # HumanMessagePromptTemplate.from_template(&#34;{user_input}&#34;) # ]) chat_template.pretty_print() # 1.partial(输入部分变量，输出新的 Template prompt_partial = chat_template.partial(professor=&#34;网红&#34;)#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt; prompt_partial.pretty_print() #此时partial把值存到了变量了，当invoke或者format_messages即执行阶段才做变量替换 print(prompt_partial.partial_variables) # 2.invoke(输入字典，输出PromptValue) prompt_invoke = chat_template.invoke({&#34;professor&#34;: &#34;网红&#34;, &#34;name&#34;: &#34;峰哥&#34;, &#34;user_input&#34;: &#34;这怎么办？&#34;}) # 3.format(变量,输出str)#把 ChatPromptTemplate 强行压扁成字符串 prompt_format = chat_template.format(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;) # 4.format_messages(输入变量，输出List[BaseMessage],BaseMessage也有pretty_print（）方法) chat_prompt1 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;) # 1.元组 chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;, chat_history=[(&#34;human&#34;, &#34;怎么会这样&#34;), (&#34;ai&#34;, &#34;这是个好事儿&#34;)]) # 2.字典 # chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;, # chat_history=[{&#39;role&#39;: &#34;human&#34;, &#39;content&#39;: &#34;怎么会这样&#34;}, # {&#39;role&#39;: &#34;ai&#34;, &#39;content&#39;: &#34;这是个好事儿&#34;}]) # # 3.BaseMessagePromptTemplate # chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;, # chat_history=[ # HumanMessage(content=&#34;怎么会这样&#34;), # AIMessage(content=&#34;这是个好事儿&#34;) # ]) for i in chat_prompt2: i.pretty_print() 2.selecotrs ExampleSelector 类型：LengthBasedExampleSelector根据长度选几个，SemanticSimilarityExampleSelector根据向量相似度选示例，结合 FewShotPromptTemplate &#43; SelectorLangChain 会自动选相似 example，拼接 prompt，返回最终字符串。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blogs">
+    <meta property="article:published_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:modified_time" content="2025-12-17T12:31:27+08:00">
+    <meta property="article:tag" content="Code">
+    <meta property="article:tag" content="Langchain">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="1.Prompt">
+  <meta name="twitter:description" content="安装：pip install langchain langchain-community
+文档：https://docs.langchain.com/oss/python/langchain/messages#openai
+1.prompt template prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。
+1.1.PromptTemplate输入单字符串,适用文本补全模型 # from_template prompt = PromptTemplate.from_template(&#34;讲个{topic}相关的{content}&#34;)#&lt;class &#39;langchain_core.prompts.prompt.PromptTemplate&#39;&gt; prompt.pretty_print() # 1.partial(输入部分变量，输出新的 Template) prompt_partial = prompt.partial(topic=&#34;股票&#34;)#&lt;class &#39;langchain_core.prompts.prompt.PromptTemplate&#39;&gt; # 2.invoke(输入字典，输出PromptValue)，PromptValue 才是 LangChain 世界里的“Prompt 本体” prompt_invoke = prompt.invoke({&#34;topic&#34;: &#34;股票&#34;, &#34;content&#34;: &#34;诗歌&#34;})#&lt;class &#39;langchain_core.prompt_values.StringPromptValue&#39;&gt; print(prompt_invoke.to_string()) #讲个股票相关的诗歌 print(prompt_invoke.to_messages()) #[HumanMessage(content=&#39;讲个股票相关的诗歌&#39;, additional_kwargs={}, response_metadata={})] for i in prompt_invoke.to_messages(): i.pretty_print() # 3.format(输入变量,输出str) prompt_format = prompt.format(topic=&#34;股票&#34;, content=&#34;笑话&#34;)#&lt;class &#39;str&#39;&gt; 1.2.ChatPromptTemplate适用于对话模型 # from_template输入字符传，自动转换为HumanMessagePromptTemplate prompt = ChatPromptTemplate.from_template(&#34;讲个{topic}相关的{content}&#34;)#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt; prompt.pretty_print() # from_messages，有3种输入类型，元组，字典和BaseMessagePromptTemplate # 1.元组(system,AI,placeholder,human)本质还是BaseMessagePromptTemplate chat_template = ChatPromptTemplate.from_messages( [ (&#34;system&#34;, &#34;我是一个{professor}&#34;), (&#34;ai&#34;, &#34;我叫{name}&#34;), (&#34;placeholder&#34;, &#34;{chat_history}&#34;), (&#34;human&#34;, &#34;{user_input}&#34;) ] )#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt; # 2.字典(system,ai,placeholder,human,用role,content) # chat_template = ChatPromptTemplate.from_messages( # [ # {&#39;role&#39;: &#39;system&#39;, &#39;content&#39;: &#39;我是一个{professor}&#39;}, # {&#39;role&#39;: &#39;ai&#39;, &#39;content&#39;: &#39;我叫{name}&#39;}, # {&#39;role&#39;: &#39;placeholder&#39;, &#39;content&#39;: &#34;{chat_history}&#34;}, # {&#39;role&#39;: &#39;human&#39;, &#39;content&#39;: &#39;{user_input}&#39;} # ]) # # # 3.BaseMessagePromptTemplate(SystemMessage,HumanMessage,AIMessage,MessagesPlaceholder) # chat_template = ChatPromptTemplate.from_messages( # [SystemMessagePromptTemplate.from_template(&#34;我是一个{professor}&#34;), # AIMessagePromptTemplate.from_template(&#34;我叫{name}&#34;), # MessagesPlaceholder(&#34;chat_history&#34;, optional=True), #optional可否不传 # HumanMessagePromptTemplate.from_template(&#34;{user_input}&#34;) # ]) chat_template.pretty_print() # 1.partial(输入部分变量，输出新的 Template prompt_partial = chat_template.partial(professor=&#34;网红&#34;)#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt; prompt_partial.pretty_print() #此时partial把值存到了变量了，当invoke或者format_messages即执行阶段才做变量替换 print(prompt_partial.partial_variables) # 2.invoke(输入字典，输出PromptValue) prompt_invoke = chat_template.invoke({&#34;professor&#34;: &#34;网红&#34;, &#34;name&#34;: &#34;峰哥&#34;, &#34;user_input&#34;: &#34;这怎么办？&#34;}) # 3.format(变量,输出str)#把 ChatPromptTemplate 强行压扁成字符串 prompt_format = chat_template.format(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;) # 4.format_messages(输入变量，输出List[BaseMessage],BaseMessage也有pretty_print（）方法) chat_prompt1 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;) # 1.元组 chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;, chat_history=[(&#34;human&#34;, &#34;怎么会这样&#34;), (&#34;ai&#34;, &#34;这是个好事儿&#34;)]) # 2.字典 # chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;, # chat_history=[{&#39;role&#39;: &#34;human&#34;, &#39;content&#39;: &#34;怎么会这样&#34;}, # {&#39;role&#39;: &#34;ai&#34;, &#39;content&#39;: &#34;这是个好事儿&#34;}]) # # 3.BaseMessagePromptTemplate # chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;, # chat_history=[ # HumanMessage(content=&#34;怎么会这样&#34;), # AIMessage(content=&#34;这是个好事儿&#34;) # ]) for i in chat_prompt2: i.pretty_print() 2.selecotrs ExampleSelector 类型：LengthBasedExampleSelector根据长度选几个，SemanticSimilarityExampleSelector根据向量相似度选示例，结合 FewShotPromptTemplate &#43; SelectorLangChain 会自动选相似 example，拼接 prompt，返回最终字符串。">
+
+
+<link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
+<link rel="stylesheet" href="/css/footer.css" media="all">
+
+
+<link rel="stylesheet" href="/css/theme.css" media="all">
+
+<style>
+    :root {
+        --text-color: #343a40;
+        --text-secondary-color: #6c757d;
+        --text-link-color: #007bff;
+        --background-color: #eaedf0;
+        --secondary-background-color: #64ffda1a;
+        --primary-color: #007bff;
+        --secondary-color: #f8f9fa;
+
+         
+        --text-color-dark: #e4e6eb;
+        --text-secondary-color-dark: #b0b3b8;
+        --text-link-color-dark: #ffffff;
+        --background-color-dark: #18191a;
+        --secondary-background-color-dark: #212529;
+        --primary-color-dark: #ffffff;
+        --secondary-color-dark: #212529;
+    }
+    body {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    html {
+        background-color: var(--background-color) !important;
+    }
+
+    body::-webkit-scrollbar {
+        height: 0px;
+        width: 8px;
+        background-color: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 1rem;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 1rem;
+        background: #b0b0b0;
+        outline: 1px solid var(--background-color);
+    }
+
+    #search-content::-webkit-scrollbar {
+        width: .5em;
+        height: .1em;
+        background-color: var(--background-color);
+    }
+</style>
+
+
+
+<meta name="description" content="">
+<link rel="stylesheet" href="/css/single.css">
+
+
+<script defer src="/fontawesome-6/all-6.4.2.js"></script>
+
+
+  
+  
+
+  <title>
+1.Prompt | Profile
+
+  </title>
+</head>
+
+<body class="light">
+  
+  
+<script>
+    let localStorageValue = localStorage.getItem("pref-theme");
+    let mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    switch (localStorageValue) {
+        case "dark":
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            break;
+        case "light":
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            break;
+        default:
+            if (mediaQuery) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            }
+            break;
+    }
+</script>
+
+
+
+
+<script>
+    var prevScrollPos = window.pageYOffset;
+    window.addEventListener("scroll", function showHeaderOnScroll() {
+        let profileHeaderElem = document.getElementById("profileHeader");
+        let currentScrollPos = window.pageYOffset;
+        let resetHeaderStyle = false;
+        let showNavBarOnScrollUp =  true ;
+        let showNavBar = showNavBarOnScrollUp ? prevScrollPos > currentScrollPos : currentScrollPos > 0;
+        if (showNavBar) {
+            profileHeaderElem.classList.add("showHeaderOnTop");
+        } else {
+            resetHeaderStyle = true;
+        }
+        if(currentScrollPos === 0) {
+            resetHeaderStyle = true;
+        }
+        if(resetHeaderStyle) {
+            profileHeaderElem.classList.remove("showHeaderOnTop");
+        }
+        prevScrollPos = currentScrollPos;
+    });
+</script>
+
+
+
+<header id="profileHeader">
+    <nav class="pt-3 navbar navbar-expand-lg animate">
+        <div class="container-fluid mx-xs-2 mx-sm-5 mx-md-5 mx-lg-5">
+            
+            <a class="navbar-brand primary-font text-wrap" href="/">
+                
+                <img src="/fav.png" width="30" height="30"
+                    class="d-inline-block align-top">
+                Profile
+                
+            </a>
+
+            
+                <div>
+                    <input id="search" autocomplete="off" class="form-control mr-sm-2 d-none d-md-block" placeholder='Ctrl &#43; k to Search...'
+                        aria-label="Search" oninput="searchOnChange(event)">
+                </div>
+            
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true">
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </button>
+
+            
+            <div class="collapse navbar-collapse text-wrap primary-font" id="navbarContent">
+                <ul class="navbar-nav ms-auto text-center">
+                    
+                        <li class="nav-item navbar-text d-block d-md-none">
+                            <div class="nav-link">
+                                <input id="search" autocomplete="off" class="form-control mr-sm-2" placeholder='Ctrl &#43; k to Search...' aria-label="Search" oninput="searchOnChange(event)">
+                            </div>
+                        </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#about" aria-label="about">
+                            About Me
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#experience"
+                            aria-label="experience">
+                            Experience
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#education"
+                            aria-label="education">
+                            Education
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#contact"
+                            aria-label="contact">
+                            Contact
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/blogs" title="Blog posts">
+                            
+                            Blog
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/gallery" title="Blog posts">
+                            
+                            Gallery
+                        </a>
+                    </li>
+                    
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        
+                        <div class="text-center">
+                            <button id="theme-toggle">
+                                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                    
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+<div id="content">
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">1.Prompt</h1>
+            <div class="text-center">
+              
+                Zoe
+                <small>|</small>
+              
+              Dec 17, 2025
+
+              
+              <span id="readingTime">
+                min read
+              </span>
+              
+            </div>
+          </div>
+          
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="/images/blogs/01prompt.png" alt="1.Prompt">
+          </div>
+          
+          <article class="page-content  p-2">
+          <p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;讲个</span><span style="color:#e6db74">{topic}</span><span style="color:#e6db74">相关的</span><span style="color:#e6db74">{content}</span><span style="color:#e6db74">&#34;</span>)<span style="color:#75715e">#&lt;class &#39;langchain_core.prompts.prompt.PromptTemplate&#39;&gt;</span>
+</span></span><span style="display:flex;"><span>prompt<span style="color:#f92672">.</span>pretty_print()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.partial(输入部分变量，输出新的 Template)</span>
+</span></span><span style="display:flex;"><span>prompt_partial <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>partial(topic<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;股票&#34;</span>)<span style="color:#75715e">#&lt;class &#39;langchain_core.prompts.prompt.PromptTemplate&#39;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.invoke(输入字典，输出PromptValue)，PromptValue 才是 LangChain 世界里的“Prompt 本体”</span>
+</span></span><span style="display:flex;"><span>prompt_invoke <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;topic&#34;</span>: <span style="color:#e6db74">&#34;股票&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;诗歌&#34;</span>})<span style="color:#75715e">#&lt;class &#39;langchain_core.prompt_values.StringPromptValue&#39;&gt;</span>
+</span></span><span style="display:flex;"><span>print(prompt_invoke<span style="color:#f92672">.</span>to_string())  <span style="color:#75715e">#讲个股票相关的诗歌</span>
+</span></span><span style="display:flex;"><span>print(prompt_invoke<span style="color:#f92672">.</span>to_messages())  <span style="color:#75715e">#[HumanMessage(content=&#39;讲个股票相关的诗歌&#39;, additional_kwargs={}, response_metadata={})]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> prompt_invoke<span style="color:#f92672">.</span>to_messages():
+</span></span><span style="display:flex;"><span>    i<span style="color:#f92672">.</span>pretty_print()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.format(输入变量,输出str)</span>
+</span></span><span style="display:flex;"><span>prompt_format <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>format(topic<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;股票&#34;</span>, content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;笑话&#34;</span>)<span style="color:#75715e">#&lt;class &#39;str&#39;&gt;</span>
+</span></span></code></pre></div><h2 id="12chatprompttemplate适用于对话模型">1.2.ChatPromptTemplate适用于对话模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template输入字符传，自动转换为HumanMessagePromptTemplate</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_template(<span style="color:#e6db74">&#34;讲个</span><span style="color:#e6db74">{topic}</span><span style="color:#e6db74">相关的</span><span style="color:#e6db74">{content}</span><span style="color:#e6db74">&#34;</span>)<span style="color:#75715e">#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt;</span>
+</span></span><span style="display:flex;"><span>prompt<span style="color:#f92672">.</span>pretty_print()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># from_messages，有3种输入类型，元组，字典和BaseMessagePromptTemplate</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.元组(system,AI,placeholder,human)本质还是BaseMessagePromptTemplate</span>
+</span></span><span style="display:flex;"><span>chat_template <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages(
+</span></span><span style="display:flex;"><span>    [
+</span></span><span style="display:flex;"><span>        (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;我是一个</span><span style="color:#e6db74">{professor}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>        (<span style="color:#e6db74">&#34;ai&#34;</span>, <span style="color:#e6db74">&#34;我叫</span><span style="color:#e6db74">{name}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>        (<span style="color:#e6db74">&#34;placeholder&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{chat_history}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>        (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{user_input}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>)<span style="color:#75715e">#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.字典(system,ai,placeholder,human,用role,content)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chat_template = ChatPromptTemplate.from_messages(</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         {&#39;role&#39;: &#39;system&#39;, &#39;content&#39;: &#39;我是一个{professor}&#39;},</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         {&#39;role&#39;: &#39;ai&#39;, &#39;content&#39;: &#39;我叫{name}&#39;},</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         {&#39;role&#39;: &#39;placeholder&#39;, &#39;content&#39;: &#34;{chat_history}&#34;},</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         {&#39;role&#39;: &#39;human&#39;, &#39;content&#39;: &#39;{user_input}&#39;}</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     ])</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># # 3.BaseMessagePromptTemplate(SystemMessage,HumanMessage,AIMessage,MessagesPlaceholder)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chat_template = ChatPromptTemplate.from_messages(</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     [SystemMessagePromptTemplate.from_template(&#34;我是一个{professor}&#34;),</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#      AIMessagePromptTemplate.from_template(&#34;我叫{name}&#34;),</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#      MessagesPlaceholder(&#34;chat_history&#34;, optional=True),  #optional可否不传</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#      HumanMessagePromptTemplate.from_template(&#34;{user_input}&#34;)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#      ])</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_template<span style="color:#f92672">.</span>pretty_print()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.partial(输入部分变量，输出新的 Template</span>
+</span></span><span style="display:flex;"><span>prompt_partial <span style="color:#f92672">=</span> chat_template<span style="color:#f92672">.</span>partial(professor<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;网红&#34;</span>)<span style="color:#75715e">#&lt;class &#39;langchain_core.prompts.chat.ChatPromptTemplate&#39;&gt;</span>
+</span></span><span style="display:flex;"><span>prompt_partial<span style="color:#f92672">.</span>pretty_print()  <span style="color:#75715e">#此时partial把值存到了变量了，当invoke或者format_messages即执行阶段才做变量替换</span>
+</span></span><span style="display:flex;"><span>print(prompt_partial<span style="color:#f92672">.</span>partial_variables)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.invoke(输入字典，输出PromptValue)</span>
+</span></span><span style="display:flex;"><span>prompt_invoke <span style="color:#f92672">=</span> chat_template<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;professor&#34;</span>: <span style="color:#e6db74">&#34;网红&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;峰哥&#34;</span>, <span style="color:#e6db74">&#34;user_input&#34;</span>: <span style="color:#e6db74">&#34;这怎么办？&#34;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3.format(变量,输出str)#把 ChatPromptTemplate 强行压扁成字符串</span>
+</span></span><span style="display:flex;"><span>prompt_format <span style="color:#f92672">=</span> chat_template<span style="color:#f92672">.</span>format(professor<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;网红&#34;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;峰哥&#34;</span>, user_input<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;这怎么办？&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4.format_messages(输入变量，输出List[BaseMessage],BaseMessage也有pretty_print（）方法)</span>
+</span></span><span style="display:flex;"><span>chat_prompt1 <span style="color:#f92672">=</span> chat_template<span style="color:#f92672">.</span>format_messages(professor<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;网红&#34;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;峰哥&#34;</span>, user_input<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;这怎么办？&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.元组</span>
+</span></span><span style="display:flex;"><span>chat_prompt2 <span style="color:#f92672">=</span> chat_template<span style="color:#f92672">.</span>format_messages(professor<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;网红&#34;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;峰哥&#34;</span>, user_input<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;这怎么办？&#34;</span>,
+</span></span><span style="display:flex;"><span>                                             chat_history<span style="color:#f92672">=</span>[(<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;怎么会这样&#34;</span>), (<span style="color:#e6db74">&#34;ai&#34;</span>, <span style="color:#e6db74">&#34;这是个好事儿&#34;</span>)])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2.字典</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                                              chat_history=[{&#39;role&#39;: &#34;human&#34;, &#39;content&#39;: &#34;怎么会这样&#34;},</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                                                            {&#39;role&#39;: &#34;ai&#34;, &#39;content&#39;: &#34;这是个好事儿&#34;}])</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># # 3.BaseMessagePromptTemplate</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chat_prompt2 = chat_template.format_messages(professor=&#34;网红&#34;, name=&#34;峰哥&#34;, user_input=&#34;这怎么办？&#34;,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                                              chat_history=[</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                                                  HumanMessage(content=&#34;怎么会这样&#34;),</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                                                  AIMessage(content=&#34;这是个好事儿&#34;)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                                              ])</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> chat_prompt2:
+</span></span><span style="display:flex;"><span>    i<span style="color:#f92672">.</span>pretty_print()
+</span></span></code></pre></div><h1 id="2selecotrs">2.selecotrs</h1>
+<p>ExampleSelector 类型：LengthBasedExampleSelector根据长度选几个，SemanticSimilarityExampleSelector根据向量相似度选示例，结合 FewShotPromptTemplate + SelectorLangChain 会自动选相似 example，拼接 prompt，返回最终字符串。</p>
+<h2 id="21fewshotprompttemplate">2.1.FewShotPromptTemplate</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>examples <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;happy&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;sad&#34;</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;tall&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;short&#34;</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;sunny&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;gloomy&#34;</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;windy&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;calm&#34;</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;高兴&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;悲伤&#34;</span>}
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>example_prompt <span style="color:#f92672">=</span> PromptTemplate(
+</span></span><span style="display:flex;"><span>    input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;input&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>],
+</span></span><span style="display:flex;"><span>    template<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;原词: </span><span style="color:#e6db74">{input}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">反义: </span><span style="color:#e6db74">{output}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>dynamic_prompt <span style="color:#f92672">=</span> FewShotPromptTemplate(
+</span></span><span style="display:flex;"><span>    examples<span style="color:#f92672">=</span>examples,
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># example_selector=example_selector,</span>
+</span></span><span style="display:flex;"><span>    example_prompt<span style="color:#f92672">=</span>example_prompt,
+</span></span><span style="display:flex;"><span>    prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;给出每个输入词的反义词&#34;</span>,
+</span></span><span style="display:flex;"><span>    suffix<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;原词: </span><span style="color:#e6db74">{adjective}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">反义: []&#34;</span>,
+</span></span><span style="display:flex;"><span>    input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;adjective&#34;</span>]
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(dynamic_prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;adjective&#34;</span>: <span style="color:#e6db74">&#34;big&#34;</span>}))
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 动态选择实例 - 根据长度动态选择提示词示例</span>
+</span></span><span style="display:flex;"><span>example_selector <span style="color:#f92672">=</span> LengthBasedExampleSelector(
+</span></span><span style="display:flex;"><span>    examples<span style="color:#f92672">=</span>examples,
+</span></span><span style="display:flex;"><span>    example_prompt<span style="color:#f92672">=</span>example_prompt,
+</span></span><span style="display:flex;"><span>    max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#动态选择实例 - 根据语义相似度选择提示词示例</span>
+</span></span><span style="display:flex;"><span>dotenv<span style="color:#f92672">.</span>load_dotenv()
+</span></span><span style="display:flex;"><span>example_selector <span style="color:#f92672">=</span> SemanticSimilarityExampleSelector<span style="color:#f92672">.</span>from_examples(
+</span></span><span style="display:flex;"><span>    examples,
+</span></span><span style="display:flex;"><span>    OpenAIEmbeddings(openai_api_base<span style="color:#f92672">=</span>os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_BASE&#34;</span>)),
+</span></span><span style="display:flex;"><span>    Chroma,
+</span></span><span style="display:flex;"><span>    k<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#动态选择实例 - 根据MMR与最大余弦相似度选择示例</span>
+</span></span><span style="display:flex;"><span>example_selector <span style="color:#f92672">=</span> MaxMarginalRelevanceExampleSelector<span style="color:#f92672">.</span>from_examples(
+</span></span><span style="display:flex;"><span>    examples,
+</span></span><span style="display:flex;"><span>    OpenAIEmbeddings(openai_api_base<span style="color:#f92672">=</span>os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_BASE&#34;</span>)),
+</span></span><span style="display:flex;"><span>    Chroma,
+</span></span><span style="display:flex;"><span>    k<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>dynamic_prompt <span style="color:#f92672">=</span> FewShotPromptTemplate(
+</span></span><span style="display:flex;"><span>    example_selector<span style="color:#f92672">=</span>example_selector,
+</span></span><span style="display:flex;"><span>    example_prompt<span style="color:#f92672">=</span>example_prompt,
+</span></span><span style="display:flex;"><span>    prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;给出每个输入词的反义词&#34;</span>,
+</span></span><span style="display:flex;"><span>    suffix<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;原词: </span><span style="color:#e6db74">{adjective}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">反义: []&#34;</span>,
+</span></span><span style="display:flex;"><span>    input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;adjective&#34;</span>]
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(dynamic_prompt<span style="color:#f92672">.</span>format(adjective<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;big&#34;</span>))
+</span></span></code></pre></div><h2 id="22fewshotchatmessageprompttemplate">2.2.FewShotChatMessagePromptTemplate</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>examples <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;2 🐍 2&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;4&#34;</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;input&#34;</span>: <span style="color:#e6db74">&#34;2 🐍 3&#34;</span>, <span style="color:#e6db74">&#34;output&#34;</span>: <span style="color:#e6db74">&#34;5&#34;</span>}
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>example_prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;你是一个厉害的人工智能助手&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;human&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{input}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;ai&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{output}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>few_shot_prompt <span style="color:#f92672">=</span> FewShotChatMessagePromptTemplate(
+</span></span><span style="display:flex;"><span>    example_prompt<span style="color:#f92672">=</span>example_prompt,
+</span></span><span style="display:flex;"><span>    examples<span style="color:#f92672">=</span>examples,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(few_shot_prompt<span style="color:#f92672">.</span>__class__)
+</span></span><span style="display:flex;"><span>print(few_shot_prompt<span style="color:#f92672">.</span>invoke({})<span style="color:#f92672">.</span>to_messages())
+</span></span></code></pre></div><h1 id="3smith管理prompt">3.smith管理prompt</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 使用管理[LangSmith的提示词模版](https://smith.langchain.com/hub)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1.创建并上传提示词到 LangSmith</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># client = Client(api_key=&#34;lsv2_pt_xxxxx&#34;)  #创建api</span>
+</span></span><span style="display:flex;"><span>client <span style="color:#f92672">=</span> Client()
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages(
+</span></span><span style="display:flex;"><span>    [
+</span></span><span style="display:flex;"><span>        (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;你是一个专业的职业规划顾问。&#34;</span>),
+</span></span><span style="display:flex;"><span>        (<span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;请为拥有 </span><span style="color:#e6db74">{background}</span><span style="color:#e6db74"> 背景的人提供 3 条职业建议，并说明理由。&#34;</span>),
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>client<span style="color:#f92672">.</span>push_prompt(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;career-advice-prompt&#34;</span>,
+</span></span><span style="display:flex;"><span>    object<span style="color:#f92672">=</span>prompt,
+</span></span><span style="display:flex;"><span>    description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;根据用户背景给出职业建议的中文 prompt&#34;</span>,
+</span></span><span style="display:flex;"><span>    tags<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;career&#34;</span>, <span style="color:#e6db74">&#34;cn&#34;</span>, <span style="color:#e6db74">&#34;demo&#34;</span>],
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 2.从 LangSmith 拉取提示词并测试</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>pull_prompt(<span style="color:#e6db74">&#34;career-advice-prompt&#34;</span>)
+</span></span><span style="display:flex;"><span>formatted_prompt <span style="color:#f92672">=</span> prompt<span style="color:#f92672">.</span>invoke({<span style="color:#e6db74">&#34;background&#34;</span>: <span style="color:#e6db74">&#34;agent项目&#34;</span>})  <span style="color:#75715e"># 使用变量填充提示词</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 3.更新提示词（版本迭代）</span>
+</span></span><span style="display:flex;"><span>new_prompt <span style="color:#f92672">=</span> ChatPromptTemplate<span style="color:#f92672">.</span>from_messages([
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;你是一个有趣的机器人。使用中文回复。&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{question}</span><span style="color:#e6db74">&#34;</span>),
+</span></span><span style="display:flex;"><span>])
+</span></span><span style="display:flex;"><span>client<span style="color:#f92672">.</span>push_prompt(<span style="color:#e6db74">&#34;career-advice-prompt&#34;</span>, object<span style="color:#f92672">=</span>new_prompt, tags<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;v2&#34;</span>])
+</span></span></code></pre></div>
+          </article>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg-3">
+        <div id="stickySideBar" class="sticky-sidebar">
+          
+          <aside class="toc">
+              <h5>
+                Table Of Contents
+              </h5>
+              <div class="toc-content">
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</a></li>
+    <li><a href="#12chatprompttemplate适用于对话模型">1.2.ChatPromptTemplate适用于对话模型</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#21fewshotprompttemplate">2.1.FewShotPromptTemplate</a></li>
+    <li><a href="#22fewshotchatmessageprompttemplate">2.2.FewShotChatMessagePromptTemplate</a></li>
+  </ul>
+</nav>
+              </div>
+          </aside>
+          
+
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/code"
+                target="_blank"
+              >code</a></li>
+              
+              <li class="list-inline-item"><a href="http://localhost:1313/tags/langchain"
+                target="_blank"
+              >langchain</a></li>
+              
+            </ul>
+          </aside>
+          
+
+          
+          <aside class="social">
+            <h5>Social</h5>
+            <div class="social-content">
+              <ul class="list-inline">
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2f1.prompt%2f">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='https://twitter.com/share?text=1.Prompt&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2f1.prompt%2f&hashtags=code%2clangchain'>
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=1.Prompt: http%3a%2f%2flocalhost%3a1313%2fblogs%2f1.prompt%2f">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='mailto:?subject=1.Prompt&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2f1.prompt%2f'>
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-9 p-4">
+        
+      </div>
+    </div>
+  </div>
+  <button class="p-2 px-3" onclick="topFunction()" id="topScroll">
+    <i class="fas fa-angle-up"></i>
+  </button>
+</section>
+
+
+<div class="progress">
+  <div id="scroll-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<Script src="/js/scrollProgressBar.js"></script>
+
+
+<script>
+  var topScroll = document.getElementById("topScroll");
+  window.onscroll = function() {scrollFunction()};
+
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      topScroll.style.display = "block";
+    } else {
+      topScroll.style.display = "none";
+    }
+  }
+
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+
+  
+  let stickySideBarElem = document.getElementById("stickySideBar");
+  let stickyNavBar =  true ;
+  if(stickyNavBar) {
+    let headerElem = document.getElementById("profileHeader");
+    let headerHeight = headerElem.offsetHeight + 15;
+    stickySideBarElem.style.top = headerHeight + "px";
+  } else {
+    stickySideBarElem.style.top = "50px";
+  }
+</script>
+
+
+<script src="/js/readingTime.js"></script>
+
+
+
+  </div><footer>
+    
+ 
+ 
+<div class="container py-3" id="recent-posts">
+    
+    
+    <div class="h3 text-center text-secondary py-3">
+        Recent Posts
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/">
+                        <img src="/images/blogs/claudecode.jpeg" class="card-img-top" alt="不翻墙使用Claude-code">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="不翻墙使用Claude-code">不翻墙使用Claude-code</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>claude经常封号，所以索性使用第三方api，不用翻墙使用。</p>
+<h1 id="1安装claude_code">1.安装claude_code</h1>
+<p>首先去<a href="https://code.claude.com/docs/en/overview">官网</a>根据设备型号进行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -fsSL https://claude.ai/install.sh | bash
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#39;export PATH=&#34;$HOME/.local/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc <span style="color:#f92672">&amp;&amp;</span> source ~/.zshrc
+</span></span><span style="display:flex;"><span>claude -v
+</span></span></code></pre></div><h1 id="2接入第三方api">2.接入第三方API</h1>
+<p>1.使用<a href="https://referer.shadowai.xyz/r/1044709">第三方中转</a>，购买key。然后进行如下配置</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p ~/.claude
+</span></span><span style="display:flex;"><span>vi …</span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Feb 21, 2026</span>
+                    <a href="/blogs/%E4%B8%8D%E7%BF%BB%E5%A2%99%E4%BD%BF%E7%94%A8claude_code/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/1.prompt/">
+                        <img src="/images/blogs/01prompt.png" class="card-img-top" alt="1.Prompt">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/1.prompt/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="1.Prompt">1.Prompt</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><p>安装：<code>pip install langchain langchain-community</code></p>
+<p>文档：https://docs.langchain.com/oss/python/langchain/messages#openai</p>
+<p><img src="/Users/zoe/Desktop/my-blog/static/images/blogs/01prompt.png" alt="01prompt"></p>
+<h1 id="1prompt-template">1.prompt template</h1>
+<p>prompt组件中，默认使用f-string方法格式化变量。PromptTemplate是可填充变量的字符串模板。ChatPromptTemplate 输出的是“消息结构”，不是字符串。</p>
+<h2 id="11prompttemplate输入单字符串适用文本补全模型">1.1.PromptTemplate输入单字符串,适用文本补全模型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># from_template</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">. …</span></span></span></span></span></code></pre></div></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/1.prompt/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/10.tools/">
+                        <img src="/images/blogs/10tools.png" class="card-img-top" alt="10.Tools">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/10.tools/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="10.Tools">10.Tools</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h1></h1>
+<p>参考：https://docs.langchain.com/oss/javascript/langchain/tools</p>
+<p>模型的Function Call功能</p>
+<p><img src="/Users/zoe/Desktop/langchain/imgs/10tools.png" alt="10tools"></p>
+<p>1.langchain内置工具(包)</p>
+<p>在 LangChain 中，所有工具都是 <code>BaseTool</code> 的子类，并且工具也是 <code>Runnable</code> 可运行组件，支持通过 <code>invoke</code>、<code>batch</code> 和 <code>stream</code> 等方法进行调用，使用起来也非常简单，实例化工具后直接调用 <code>invoke</code> 函数即可，除此之外，可以通过 <code>name</code>、<code>description</code>、<code>args</code>、<code>return_direct</code> 属性来获取到工具的相关信息。</p>
+<p>内置工具tools与内置工具 …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">Dec 17, 2025</span>
+                    <a href="/blogs/10.tools/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="text-center pt-2">
+    
+
+    
+
+    
+
+    
+
+    
+</div><div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            
+                <div class="pb-2">
+                    <a href="http://localhost:1313/" title="Profile">
+                        <img alt="Footer logo" src="/fav.png"
+                            height="40px" width="40px">
+                    </a>
+                </div>
+            
+            &copy; 2026  All rights reserved
+            <div class="text-secondary">
+                Made with
+                <span class="text-danger">
+                    &#10084;
+                </span>
+                and
+                <a href="https://github.com/gurusabarish/hugo-profile" target="_blank"
+                    title="Designed and developed by gurusabarish">
+                    Hugo Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</footer><script src="/bootstrap-5/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    }
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+</script>
+
+
+    <script src="/js/search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+  <section id="search-content" class="py-2">
+    <div class="container" id="search-results"></div>
+  </section>
+</body>
+
+</html>
